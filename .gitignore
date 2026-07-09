@@ -1,0 +1,11 @@
+﻿__pycache__/
+*.pyc
+.env
+.DS_Store
+*.egg-info/
+dist/
+*.png
+
+DEFINE_guide/
+
+DEFINE_guide/

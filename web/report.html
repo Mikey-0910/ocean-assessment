@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你的人格报告 · OCEAN</title>
+
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config: 品牌色、字体、阴影 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#4A88D8',
+                            'primary-light': '#7BA8E8',
+                            'primary-dark': '#3568B0',
+                            auxiliary: '#63B995',
+                            'auxiliary-light': '#8FD4B8',
+                            warm: '#F2A25C',
+                            'warm-light': '#F7BE8C',
+                            coral: '#E87575',
+                            'coral-light': '#F2A0A0',
+                            bg: '#F7F8FA',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px rgba(74, 136, 216, 0.08)',
+                        'lift': '0 12px 40px rgba(74, 136, 216, 0.15)',
+                        'glow': '0 0 60px rgba(74, 136, 216, 0.12)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ===== 基础 ===== */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background-color: #F7F8FA;
+            color: #1F2937;
+            overflow-x: hidden;
+        }
+
+        /* ===== 背景光斑 ===== */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.45;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .blob-blue {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(74, 136, 216, 0.35), transparent 70%);
+            top: -150px;
+            right: -150px;
+        }
+        .blob-teal {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 185, 149, 0.3), transparent 70%);
+            top: 40%;
+            left: -120px;
+        }
+        .blob-warm {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(242, 162, 92, 0.25), transparent 70%);
+            bottom: 10%;
+            right: -100px;
+        }
+
+        /* ===== 玻璃卡片 ===== */
+        .glass {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(74, 136, 216, 0.08);
+        }
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        /* ===== 卡片悬浮 ===== */
+        .card-float {
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+        }
+        .card-float:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(74, 136, 216, 0.14);
+        }
+
+        /* ===== 按钮微弹 ===== */
+        .btn-bounce {
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+        }
+        .btn-bounce:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(74, 136, 216, 0.28);
+        }
+        .btn-bounce:active {
+            transform: scale(0.97);
+        }
+
+        /* ===== 滚动渐显 ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* ===== Hero 初始动画 ===== */
+        .hero-fade {
+            opacity: 0;
+            transform: translateY(24px);
+            animation: heroFadeIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .hero-fade-delay-1 { animation-delay: 0.15s; }
+        .hero-fade-delay-2 { animation-delay: 0.3s; }
+        .hero-fade-delay-3 { animation-delay: 0.45s; }
+        .hero-fade-delay-4 { animation-delay: 0.6s; }
+
+        @keyframes heroFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-anim {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        /* ===== 轮播 ===== */
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .carousel-slide {
+            min-width: 100%;
+            opacity: 0.4;
+            transform: scale(0.96);
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .carousel-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* ===== 聊天窗口动画 ===== */
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 380px;
+            max-height: 640px;
+            border-radius: 24px;
+            opacity: 0;
+            transform: scale(0.92) translateY(20px);
+            transform-origin: bottom right;
+            pointer-events: none;
+            transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 50;
+        }
+        .chat-window.open {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        /* ===== 标签徽章 ===== */
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        .tag-pill:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ===== 等级徽章 ===== */
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .level-high { background: rgba(99, 185, 149, 0.14); color: #2D8A68; }
+        .level-mid { background: rgba(242, 162, 92, 0.14); color: #C77A2E; }
+        .level-low { background: rgba(232, 117, 117, 0.14); color: #C04848; }
+
+        /* ===== 自定义滚动条 ===== */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(74, 136, 216, 0.2);
+            border-radius: 3px;
+        }
+
+        /* ===== 响应式：手机聊天窗口 ===== */
+        @media (max-width: 640px) {
+            .chat-window {
+                width: calc(100% - 32px);
+                right: 16px;
+                bottom: 80px;
+                border-radius: 20px;
+                transform-origin: bottom center;
+            }
+            .blob {
+                opacity: 0.3;
+            }
+        }
+
+        /* ===== 折叠卡 ===== */
+        details > summary {
+            list-style: none;
+            cursor: pointer;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] .chevron {
+            transform: rotate(180deg);
+        }
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+
+        /* ===== 输入框焦点 ===== */
+        .input-glow:focus {
+            outline: none;
+            border-color: #4A88D8;
+            box-shadow: 0 0 0 3px rgba(74, 136, 216, 0.12);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- 动态 Tailwind 类预声明（供 Play CDN 扫描） -->
+    <div class="hidden text-brand-primary text-brand-auxiliary text-brand-warm text-brand-coral bg-brand-primary/10 bg-brand-auxiliary/10 bg-brand-warm/10 bg-brand-coral/10 bg-gradient-to-br from-brand-primary/10 to-brand-primary/5 from-brand-auxiliary/10 to-brand-auxiliary/5 from-brand-warm/10 to-brand-warm/5"></div>
+
+    <!-- 背景光斑 -->
+    <div class="blob blob-blue"></div>
+    <div class="blob blob-teal"></div>
+    <div class="blob blob-warm"></div>
+
+    <!-- 页面内容 -->
+    <main class="relative z-10">
+
+        <!-- ==================== Hero ==================== -->
+        <section id="hero" class="min-h-screen flex items-center justify-center px-6 py-20">
+            <div class="max-w-4xl mx-auto text-center">
+                <!-- 欢迎标签 -->
+                <div class="hero-fade inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
+                    <i data-lucide="hand" class="w-4 h-4 text-brand-primary"></i>
+                    <span class="text-sm font-medium text-gray-600">欢迎回来</span>
+                </div>
+
+                <!-- 主标题 -->
+                <h1 class="hero-fade hero-fade-delay-1 text-4xl md:text-6xl font-bold text-gray-800 leading-tight mb-6">
+                    今天，我们重新认识了一次自己
+                </h1>
+
+                <!-- 副标题 -->
+                <p class="hero-fade hero-fade-delay-2 text-xl md:text-2xl text-gray-500 font-light leading-relaxed mb-12">
+                    人格不是标签，<br class="md:hidden">而是理解自己的起点
+                </p>
+
+                <!-- 综合画像卡片 -->
+                <div class="hero-fade hero-fade-delay-3 max-w-xl mx-auto mb-12">
+                    <div class="glass rounded-3xl p-8 md:p-10 card-float float-anim relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-brand-primary/10 to-brand-auxiliary/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+
+                        <div class="relative z-10">
+                            <p class="text-sm text-gray-500 mb-2">你的综合画像</p>
+                            <h2 id="hero-archetype" class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">平衡探索者</h2>
+                            <p id="hero-summary" class="text-gray-600 leading-relaxed mb-6">你像是一个带着好奇心观察世界的人。你是一盏需要从人群中获取能量的灯；你天生容易感知到别人的情绪。同时你懂得规划，也懂得灵活，而大多数时候情绪稳定，但压力来了也会波动。</p>
+
+                            <div class="flex items-center justify-center gap-4">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-brand-primary" id="hero-score">73.5</p>
+                                    <p class="text-xs text-gray-400">综合得分</p>
+                                </div>
+                                <div class="w-px h-10 bg-gray-200"></div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-brand-auxiliary">5</p>
+                                    <p class="text-xs text-gray-400">维度</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <div class="hero-fade hero-fade-delay-4">
+                    <button onclick="scrollToSection('overview')" class="btn-bounce inline-flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-full font-medium text-lg shadow-lift hover:bg-brand-primary-dark transition-colors">
+                        开始查看报告
+                        <i data-lucide="arrow-down" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 人格总览 ==================== -->
+        <section id="overview" class="py-24 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="reveal mb-12">
+                    <p class="text-sm font-medium text-brand-primary mb-2">人格总览</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">看见自己的形状</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <!-- 左侧：雷达图 -->
+                    <div class="reveal reveal-delay-1 lg:col-span-7">
+                        <div class="glass rounded-3xl p-6 md:p-10 card-float">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-700">五维雷达图</h3>
+                                <span class="text-xs text-gray-400">分数范围 5-20</span>
+                            </div>
+                            <div class="relative w-full max-w-md mx-auto aspect-square">
+                                <canvas id="radar-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：总结卡 -->
+                    <div class="reveal reveal-delay-2 lg:col-span-5 space-y-6">
+                        <div class="glass rounded-3xl p-8">
+                            <p class="text-sm text-gray-500 mb-2">你是一位</p>
+                            <h3 id="overview-archetype" class="text-3xl font-bold text-gray-800 mb-4">平衡探索者</h3>
+                            <p id="overview-summary" class="text-gray-600 leading-relaxed mb-6">你像是一个带着好奇心观察世界的人。你是一盏需要从人群中获取能量的灯；你天生容易感知到别人的情绪。同时你懂得规划，也懂得灵活。</p>
+
+                            <div id="overview-keywords" class="flex flex-wrap gap-2 mb-6">
+                                <!-- 关键词标签由 JS 生成 -->
+                            </div>
+
+                            <div class="bg-gradient-to-r from-brand-primary/10 to-brand-auxiliary/10 rounded-2xl p-5">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500 mb-1">总体评分</p>
+                                        <p id="overview-score" class="text-3xl font-bold text-brand-primary">73.5</p>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center">
+                                        <i data-lucide="sparkles" class="w-6 h-6 text-brand-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 人格维度轮播 ==================== -->
+        <section id="dimensions" class="py-24 px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="reveal text-center mb-12">
+                    <p class="text-sm font-medium text-brand-primary mb-2">人格维度</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">五个面向，一个你</h2>
+                    <p class="text-gray-500">左右切换，深入了解每一个维度</p>
+                </div>
+
+                <div class="reveal reveal-delay-1 relative">
+                    <!-- 轮播容器 -->
+                    <div class="overflow-hidden rounded-3xl">
+                        <div id="dimension-carousel" class="carousel-track">
+                            <!-- 轮播卡片由 JS 生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 左右箭头 -->
+                    <button id="prev-dim" class="absolute left-0 md:-left-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass flex items-center justify-center text-gray-600 hover:text-brand-primary hover:shadow-lift transition-all z-20 hidden md:flex">
+                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                    </button>
+                    <button id="next-dim" class="absolute right-0 md:-right-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass flex items-center justify-center text-gray-600 hover:text-brand-primary hover:shadow-lift transition-all z-20 hidden md:flex">
+                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                    </button>
+
+                    <!-- 圆点分页 -->
+                    <div id="dim-dots" class="flex items-center justify-center gap-2 mt-8">
+                        <!-- 圆点由 JS 生成 -->
+                    </div>
+                </div>
+
+                <!-- 移动端滑动提示 -->
+                <p class="md:hidden text-center text-sm text-gray-400 mt-4 flex items-center justify-center gap-1">
+                    <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+                    左右滑动切换维度
+                </p>
+            </div>
+        </section>
+
+        <!-- ==================== AI 建议 ==================== -->
+        <section id="suggestions" class="py-24 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="reveal text-center mb-12">
+                    <p class="text-sm font-medium text-brand-primary mb-2">AI 给你的建议</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">为你量身定制的成长指南</h2>
+                    <p class="text-gray-500">基于你的测评结果，这里有三条温柔提醒</p>
+                </div>
+
+                <div id="ai-suggestions" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- 建议卡片由 JS 生成 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 开放题说明 ==================== -->
+        <section id="open-text" class="py-16 px-6">
+            <div class="max-w-3xl mx-auto">
+                <details class="reveal glass rounded-2xl overflow-hidden" open>
+                    <summary class="flex items-center justify-between p-6 text-gray-600 hover:text-gray-800 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="message-square-plus" class="w-5 h-5 text-brand-primary"></i>
+                            <span class="font-medium">开放题说明</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 chevron"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-4">
+                        <p id="open-text-content">本次测评中，你有 2 道题使用了开放说明，主要分布在开放性、神经质两个维度。这些补充说明已按评分标准纳入对应维度总分。若后端不可用，系统会自动降级为本地规则评分，结果仅供参考。</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ==================== 底部留白 ==================== -->
+        <div class="h-32"></div>
+    </main>
+
+    <!-- ==================== AI 人格 Agent ==================== -->
+    <!-- 悬浮按钮 -->
+    <button id="chat-toggle" class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lift flex items-center justify-center z-50 btn-bounce" aria-label="打开人格成长助手">
+        <i data-lucide="message-circle" class="w-6 h-6"></i>
+    </button>
+
+    <!-- 聊天窗口 -->
+    <div id="chat-window" class="chat-window glass-strong shadow-lift flex flex-col overflow-hidden" role="dialog" aria-label="人格成长助手">
+        <!-- 头部 -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center">
+                    <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800">人格成长助手</p>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-gray-500">在线</span>
+                    </div>
+                </div>
+            </div>
+            <button id="chat-close" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors" aria-label="关闭">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- 消息区 -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 custom-scroll">
+            <!-- 欢迎语 -->
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                </div>
+                <div class="bg-brand-primary/10 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                    <p class="text-sm text-gray-700 leading-relaxed">你好～我已经阅读了你的测评结果。你可以问我：</p>
+                </div>
+            </div>
+
+            <!-- 快捷按钮 -->
+            <div id="chat-quick-actions" class="grid grid-cols-2 gap-2 pl-11">
+                <!-- 由 JS 生成 -->
+            </div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="p-4 border-t border-gray-100 bg-white/50">
+            <div class="flex items-center gap-2">
+                <input id="chat-input" type="text" placeholder="输入你的问题..." class="flex-1 px-4 py-3 rounded-full border border-gray-200 bg-white text-sm input-glow transition-all" onkeypress="if(event.key==='Enter') sendChatMessage()">
+                <button id="chat-send" class="w-11 h-11 rounded-full bg-brand-primary text-white flex items-center justify-center hover:bg-brand-primary-dark transition-colors flex-shrink-0">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JavaScript ==================== -->
+    <script>
+        // =====================================================
+        // 1. 数据层：模拟测评结果（后续可替换为真实数据 / API / window.__REPORT_DATA__）
+        // =====================================================
+
+        const appState = {
+            user: { name: '你' },
+            reportDate: '2026.07.09',
+            // 五维得分：total 5-20，avg 1-4
+            results: {
+                O: { total: 16.5, avg: 3.30, level: '高' },
+                C: { total: 13.0, avg: 2.60, level: '中' },
+                E: { total:  9.5, avg: 1.90, level: '低' },
+                A: { total: 15.5, avg: 3.10, level: '高' },
+                N: { total: 11.0, avg: 2.20, level: '中' }
+            },
+            openText: {
+                count: 2,
+                dimensions: ['O', 'N'],
+                note: '本次测评中，你有 2 道题使用了开放说明，主要分布在开放性、神经质两个维度。这些补充说明已按评分标准纳入对应维度总分。'
+            },
+            // 当前高亮的维度索引，用于轮播和雷达图联动
+            activeDimensionIndex: 0
+        };
+
+        // 维度元数据 + 等级文案库
+        const dimensionData = {
+            O: {
+                key: 'O',
+                name: '开放性',
+                nameEn: 'Openness',
+                color: '#4A88D8',
+                icon: 'compass',
+                levels: {
+                    高: {
+                        tagline: '你对世界有一种「还没看完」的好奇心',
+                        definition: '对你来说，熟悉的东西容易变成背景，而陌生的、复杂的、甚至有点晦涩的东西才会吸引你的注意。你不只是想知道「是什么」，更想知道「如果…会怎样」。',
+                        campus: [
+                            '选课时会忍不住被那些「看起来很难但有意思」的通识课吸引。',
+                            '看到食堂门口一张抽象艺术展海报，你可能会停下来看一会儿。',
+                            '和朋友聊天时，你更愿意讨论「AI 会不会有自我意识」这类没标准答案的话题。'
+                        ],
+                        gifts: '你容易找到学习之外的意义感，能从艺术、哲学、跨学科知识里获得深层满足。你不太容易被「标准答案」困住。',
+                        shadows: '有时你会因为想得太远、看得太杂，而分散了眼前的精力。期末周才发现，自己读了很多「有趣但考不到」的东西。',
+                        tip: '好奇心是你的燃料，但别忘了给期末考试留一张「必做清单」。'
+                    },
+                    中: {
+                        tagline: '你既愿意尝试新鲜事物，也会尊重自己的舒适区',
+                        definition: '你不会拒绝所有变化，但也不会为了变化而变化。对你来说，「有意思」和「实用」都很重要。',
+                        campus: [
+                            '你会尝试一门新选修课，但前提是它对你的专业或未来发展有帮助。',
+                            '看电影时，科幻片和喜剧片你都会看，选择取决于当天累不累。',
+                            '讨论有争议的话题时，你愿意听不同的观点，但不太会主动成为那个「挑事的人」。'
+                        ],
+                        gifts: '你能在稳定和创新之间找到平衡，既不会被变化吓到，也不会因为追求新鲜而忽略了基础。',
+                        shadows: '有时候你会在「想试试」和「算了太麻烦」之间犹豫太久，错失了一些本可以拓展自己的机会。',
+                        tip: '每个学期给自己一次「无理由尝试」：选一门完全陌生的课，或参加一个从没去过的社团活动。'
+                    },
+                    低: {
+                        tagline: '你更信任已经被验证过的东西',
+                        definition: '对你来说，未知意味着不确定，而确定感会让你安心。你偏爱具体、实用、可预期的经验，而不是抽象的可能性。',
+                        campus: [
+                            '你更喜欢有明确大纲和评分标准的课程，对「开放式课题」会感到压力。',
+                            '出去玩时，你倾向于去熟悉的地方、吃熟悉的菜。',
+                            '你更擅长把老师讲的例题吃透，而不是去探索课本外的延伸内容。'
+                        ],
+                        gifts: '你是团队里那个把想法落地的人。你注重细节、执行力强，别人天马行空时，你能看到现实的约束。',
+                        shadows: '过于依赖熟悉路径，可能让你在面对新学习系统、新教学方法时产生不必要的抵触。',
+                        tip: '稳定是你的优势，但偶尔允许自己「笨拙地尝试一次新事物」，你会发现未知没想象中可怕。'
+                    }
+                }
+            },
+            C: {
+                key: 'C',
+                name: '尽责性',
+                nameEn: 'Conscientiousness',
+                color: '#63B995',
+                icon: 'clipboard-list',
+                levels: {
+                    高: {
+                        tagline: '你内心住着一位「计划通」',
+                        definition: '对你来说，把事情提前安排好、按部就班地完成，本身就是一种安心。你不喜欢被截止日期追着跑，更享受那种「我早就搞定了」的掌控感。',
+                        campus: [
+                            '小组作业里，你常常是最早打开文档、列出分工表的人。',
+                            '你的书桌和电脑文件夹大概率有清晰的分类。',
+                            '你会在期中前就开始整理复习计划，而不是考前一周通宵。'
+                        ],
+                        gifts: '你是那种「说到做到」的人，老师、同学、朋友都容易信任你。你能把长期目标拆成每天可执行的小步骤。',
+                        shadows: '当计划被打乱时，你可能会特别焦虑。偶尔的放松或「浪费时间」会让你有负罪感。',
+                        tip: '计划是为了服务生活，而不是反过来。允许自己有一天什么都不做，这不会让你的优秀打折。'
+                    },
+                    中: {
+                        tagline: '你懂得规划，也懂得灵活',
+                        definition: '你不会把事情拖到最后一刻，但也不会把每一分钟都排满。对你来说，「完成」比「完美」重要，但「差不多」也会让你有点不舒服。',
+                        campus: [
+                            '你会提前一周开始写论文，但不会提前一个月。',
+                            '小组作业你会按时完成自己的部分，但可能不会主动当组长。',
+                            '桌面偶尔乱，但在交作业前一定会整理干净。'
+                        ],
+                        gifts: '你能在自律和自由之间找到舒适的节奏，既不会因为过度计划而窒息，也不会因为完全放纵而失控。',
+                        shadows: '有时候你会在「再玩一会儿」和「该学习了」之间反复横跳，消耗了不少心理能量。',
+                        tip: '把你真正重视的 1-2 件事写进日程表，其余事情允许弹性处理，你会更轻松。'
+                    },
+                    低: {
+                        tagline: '你更像一个「即兴派」',
+                        definition: '你不喜欢被条条框框束缚，更愿意跟随当下的感觉行动。对你来说，生活是一场探索，而不是一张待办清单。',
+                        campus: [
+                            '你常常在截止日期前才开始动笔，但往往在压力下爆发灵感。',
+                            '你的桌面或电脑文件可能「乱中有序」，只有你自己找得到。',
+                            '你很容易对新鲜事物产生兴趣，但坚持下来的不多。'
+                        ],
+                        gifts: '你灵活、应变能力强，能在混乱中找到别人看不到的捷径。你不容易被规则困住。',
+                        shadows: '拖延和遗漏可能会让你错过一些机会，也会给团队作业里的队友带来压力。',
+                        tip: '试试把大任务拆成「只花 10 分钟」的第一步，启动比计划更重要。'
+                    }
+                }
+            },
+            E: {
+                key: 'E',
+                name: '外向性',
+                nameEn: 'Extraversion',
+                color: '#F2A25C',
+                icon: 'zap',
+                levels: {
+                    高: {
+                        tagline: '你是一盏需要从人群中获取能量的灯',
+                        definition: '社交、表达、被关注，这些对别人可能是消耗，对你却是充电。你倾向于把想法说出来，而不是先在脑子里转很久。',
+                        campus: [
+                            '社团招新、班级聚会、小组讨论里，你常常是那个主动搭话、活跃气氛的人。',
+                            '你遇到问题时更愿意直接找人聊，而不是自己闷头想。',
+                            '周末如果一直独处，你可能会感到无聊或低落。'
+                        ],
+                        gifts: '你容易建立人脉、抓住机会，在需要表达和协作的场合很出彩。',
+                        shadows: '独处时你可能会感到不安，或者在还没想清楚时就说了太多。',
+                        tip: '热闹很好，但偶尔关掉手机独处一小时，你可能会听到自己真正的声音。'
+                    },
+                    中: {
+                        tagline: '你既需要人，也需要独处',
+                        definition: '你可以享受聚会，但一段时间后就想回家；你可以安静听讲，但有好想法时也愿意分享。你不是非黑即白的「社牛」或「社恐」。',
+                        campus: [
+                            '你会参加社团活动，但不会把所有晚上都排满。',
+                            '小组汇报时你能讲清楚，但更喜欢和熟悉的人搭档。',
+                            '疲惫时，你选择宅在宿舍恢复，而不是继续社交。'
+                        ],
+                        gifts: '你能根据情境切换模式，既不会社交透支，也不会完全封闭自己。',
+                        shadows: '有时你会纠结「去还是不去」，在犹豫中错过了一些本可以享受的时光。',
+                        tip: '不必强迫自己成为「永远的社交达人」或「彻底的独行者」，你的节奏就是对的节奏。'
+                    },
+                    低: {
+                        tagline: '你是一块需要安静来充电的电池',
+                        definition: '人群和噪音对你来说是消耗，而独处、阅读、深度对话才是你的能量来源。你并不讨厌人，只是更喜欢有质量的连接。',
+                        campus: [
+                            '新生见面会或社团聚餐后，你需要一个人待一会儿才能恢复。',
+                            '课堂上你更习惯先想清楚再发言，而不是抢着表达。',
+                            '你有一两个非常亲近的朋友，胜过一大堆泛泛之交。'
+                        ],
+                        gifts: '你善于深度思考、倾听和观察，常常能看到别人忽略的细节。',
+                        shadows: '在需要主动表现的场合，你可能会因为紧张或被忽视而错失机会。',
+                        tip: '内向不是缺陷。你可以不变成外向的人，只需要在必要时，给自己准备一句「我可以先说」的勇气。'
+                    }
+                }
+            },
+            A: {
+                key: 'A',
+                name: '宜人性',
+                nameEn: 'Agreeableness',
+                color: '#E87575',
+                icon: 'heart-handshake',
+                levels: {
+                    高: {
+                        tagline: '你天生容易感知到别人的情绪',
+                        definition: '你愿意为别人着想。对你来说，和谐的人际关系往往比「赢」更重要。你很容易原谅，也很容易把别人的需求放在自己前面。',
+                        campus: [
+                            '朋友深夜倾诉时，哪怕你自己也很累，也会耐心听完。',
+                            '小组作业出现分歧时，你倾向于让步或找折中方案，避免冲突。',
+                            '你很难直接拒绝别人的请求，哪怕自己已经很忙。'
+                        ],
+                        gifts: '你是身边人的「情绪避风港」，大家都愿意信任你、靠近你。',
+                        shadows: '过度迁就可能会让你压抑自己的真实想法，甚至被有心人利用。',
+                        tip: '善良很珍贵，但你的需求也同样重要。练习说「我可以帮你，但今晚不行」。'
+                    },
+                    中: {
+                        tagline: '你既懂得照顾别人，也懂得保护自己',
+                        definition: '你愿意帮忙，但不会因为帮忙而牺牲自己的底线。你相信合作，但也不害怕表达不同意见。',
+                        campus: [
+                            '小组作业里，你会倾听队友的想法，但如果你的方案明显更好，你也会据理力争。',
+                            '朋友遇到麻烦时你会安慰，但也会指出他的问题所在。',
+                            '你能在「对别人好」和「对自己公平」之间找到平衡。'
+                        ],
+                        gifts: '你既有同理心，又有边界感，是团队里难得的「理性温暖型」成员。',
+                        shadows: '有时你会在「要和谐」和「要坚持」之间拉扯，做决定比别人慢一些。',
+                        tip: '你的平衡感本身就是优势，不必要求自己永远让所有人满意。'
+                    },
+                    低: {
+                        tagline: '你更习惯用逻辑和效率看待事情',
+                        definition: '你直率、独立，对「人情世故」没有那么敏感。对你来说，正确和公平往往比「大家都开心」更重要。',
+                        campus: [
+                            '小组讨论时，你会直接指出方案的问题，哪怕气氛有点僵。',
+                            '朋友问你意见时，你倾向于说真话，而不是说好听的话。',
+                            '你对陌生人的善意会保持警惕，觉得「无功不受禄」。'
+                        ],
+                        gifts: '你是那个在混乱中看清本质的人，能做出冷静、理性的判断。',
+                        shadows: '过于直接的表达方式可能会让敏感的人受伤，影响你的人际关系。',
+                        tip: '真话可以包裹在温柔的语气里。你的逻辑很锋利，但不必每次都出鞘。'
+                    }
+                }
+            },
+            N: {
+                key: 'N',
+                name: '神经质',
+                nameEn: 'Neuroticism',
+                color: '#4A88D8',
+                icon: 'waves',
+                levels: {
+                    高: {
+                        tagline: '你的情绪雷达非常灵敏',
+                        definition: '你能感受到很细微的压力、不安和变化，这也意味着你体验世界的方式更强烈。你不是一个「想太多」的人，你只是感受得太丰富。',
+                        campus: [
+                            '考试前哪怕复习得很好，你也会担心「万一考砸了怎么办」。',
+                            '老师一句批评可能让你难过很久，反复回想自己哪里做错了。',
+                            '身体不舒服时，你会忍不住往最坏的情况想。'
+                        ],
+                        gifts: '你对风险敏感，能提前发现问题；你也更容易共情他人的痛苦。',
+                        shadows: '情绪起伏大容易消耗你的能量，让你陷入焦虑、自责或失眠。',
+                        tip: '你的敏感是一种天赋，但它需要休息。当大脑开始「灾难化想象」时，试着问自己：「最坏的结果真的会发生吗？我能承受吗？」'
+                    },
+                    中: {
+                        tagline: '你大多数时候情绪稳定，但压力来了也会波动',
+                        definition: '你不会被每件小事击垮，但遇到一些挫折时也会郁闷一阵子。你属于「正常人都会有的情绪起伏」。',
+                        campus: [
+                            '考试失利会让你难受，但一两天后基本能恢复。',
+                            '被批评时你会不开心，但能冷静下来分析对错。',
+                            '遇到突发状况会紧张，但通常能控制住场面。'
+                        ],
+                        gifts: '你既能感受到生活的重量，也不会被它压垮。你有适度的情绪反应。',
+                        shadows: '压力累积太多时，你可能会突然崩溃，而自己却没意识到已经撑了很久。',
+                        tip: '情绪不需要时刻稳定才正常。感到累的时候，允许自己暂停一下。'
+                    },
+                    低: {
+                        tagline: '你的情绪底盘很稳',
+                        definition: '遇到问题时，你倾向于先想「怎么解决」，而不是先陷入情绪风暴。你对挫折的恢复速度快，也不容易被外界评价牵着走。',
+                        campus: [
+                            '考试前你紧张感有限，更关注「还能复习什么」。',
+                            '被批评时，你会聚焦于问题本身，而不是反复自我怀疑。',
+                            '遇到倒霉事，你比较容易「翻篇」，不会让它长时间影响心情。'
+                        ],
+                        gifts: '你抗压能力强，能在混乱中保持清醒，是团队里的「稳定器」。',
+                        shadows: '有时你的冷静可能被误解为冷漠，或者在需要表达情绪时显得疏离。',
+                        tip: '稳定是你的超能力，但偶尔也让身边的人看到你的情绪，他们会更亲近你。'
+                    }
+                }
+            }
+        };
+
+        // 整体画像短语库（按 O/C/E/A/N 顺序组合）
+        const overallPortrait = {
+            O: {
+                高: '对世界有一种「还没看完」的好奇心',
+                中: '既愿意尝试新鲜事物，也尊重自己的舒适区',
+                低: '更信任已被验证过的、具体可预期的事物'
+            },
+            C: {
+                高: '内心住着一位「计划通」',
+                中: '懂得规划，也懂得灵活',
+                低: '更喜欢跟随当下感觉的「即兴派」'
+            },
+            E: {
+                高: '你是一盏需要从人群中获取能量的灯',
+                中: '你既需要人，也需要独处',
+                低: '你是一块需要安静来充电的电池'
+            },
+            A: {
+                高: '你天生容易感知到别人的情绪',
+                中: '你既懂得照顾别人，也懂得保护自己',
+                低: '你更习惯用逻辑和效率看待事情'
+            },
+            N: {
+                高: '情绪雷达非常灵敏',
+                中: '大多数时候情绪稳定，但压力来了也会波动',
+                低: '情绪底盘很稳'
+            }
+        };
+
+        // 类型名规则：根据主导维度组合生成
+        const archetypeRules = [
+            // 高开放 + 高外向
+            { test: r => r.O.level === '高' && r.E.level === '高', name: '热情探索者' },
+            // 高开放 + 低外向
+            { test: r => r.O.level === '高' && r.E.level === '低', name: '沉静思考者' },
+            // 高尽责 + 低神经质
+            { test: r => r.C.level === '高' && r.N.level === '低', name: '稳健执行者' },
+            // 高宜人性 + 高外向
+            { test: r => r.A.level === '高' && r.E.level === '高', name: '温暖连接者' },
+            // 高宜人性 + 低外向
+            { test: r => r.A.level === '高' && r.E.level === '低', name: '深度倾听者' },
+            // 低神经质优先
+            { test: r => r.N.level === '低', name: '从容稳定者' },
+            // 默认
+            { test: () => true, name: '平衡探索者' }
+        ];
+
+        // AI 建议内容
+        const aiSuggestions = [
+            {
+                icon: 'book-open',
+                title: '学习建议',
+                color: 'brand-primary',
+                bg: 'from-brand-primary/10 to-brand-primary/5',
+                content: '你的开放性较高，适合用「主题式学习」替代死记硬背。每学期选 1-2 个真正感兴趣的跨学科方向深入探索，同时用清单管理把好奇心锚定在考试范围内。'
+            },
+            {
+                icon: 'sprout',
+                title: '成长建议',
+                color: 'brand-auxiliary',
+                bg: 'from-brand-auxiliary/10 to-brand-auxiliary/5',
+                content: '你既有好奇心也有责任感，成长的关键在于「完成」而非「完美」。把大目标拆成每周可执行的小步骤，允许自己有探索和走弯路的余量。'
+            },
+            {
+                icon: 'users',
+                title: '人际建议',
+                color: 'brand-warm',
+                bg: 'from-brand-warm/10 to-brand-warm/5',
+                content: '你善于感知他人情绪，也容易在关系中让渡自己的需求。练习用「我可以帮你，但今晚不行」这样的句式设立边界，你的善良会更有力量。'
+            }
+        ];
+
+        // 聊天快捷操作
+        const chatQuickActions = [
+            { icon: 'graduation-cap', label: '职业建议', prompt: '我适合什么职业方向？' },
+            { icon: 'book-marked', label: '学习规划', prompt: '根据我的结果，怎么制定学习计划？' },
+            { icon: 'message-circle-heart', label: '人际关系', prompt: '我在人际关系中需要注意什么？' },
+            { icon: 'heart', label: '情绪支持', prompt: '为什么我容易焦虑，怎么调节？' }
+        ];
+
+        // 聊天模拟回复库
+        const mockReplies = {
+            '职业建议': '基于你的测评结果，你适合既能发挥好奇心、又有人际连接空间的职业。比如产品经理、用户研究、教育、心理咨询、内容创作等领域。关键是找到「有新鲜输入」+「有意义感」的组合。',
+            '学习规划': '你的开放性高、尽责性中等，建议采用「70% 主线 + 30% 探索」的学习节奏。主线保证基础课程稳定推进，30% 时间留给跨学科阅读、项目或社团，满足你的探索欲。',
+            '人际关系': '你宜人性高，容易成为朋友的情绪避风港，但也要保护自己的能量。建议每周留出一些「不回应他人」的独处时间，并练习温和但清晰地说「不」。',
+            '情绪支持': '你的情绪体验比较丰富，这本身不是坏事。当焦虑升起时，试试「5-4-3-2-1」 grounding 练习：说出 5 样看到的东西、4 样听到的、3 样触摸到的、2 样闻到的、1 样尝到的。',
+            'default': '谢谢你提出这个问题。作为人格成长助手，我会基于你的 OCEAN 画像给出参考建议。如果你愿意，可以具体说说你最近的困扰，我会陪你一起梳理。'
+        };
+
+        // 是否使用模拟 AI（后续接 API 时改为 false）
+        const USE_MOCK_AI = true;
+
+        // Chart.js 雷达图实例
+        let radarChart = null;
+
+        // =====================================================
+        // 2. 工具函数
+        // =====================================================
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getLevelClass(level) {
+            return level === '高' ? 'level-high' : (level === '中' ? 'level-mid' : 'level-low');
+        }
+
+        function getLevelColor(level) {
+            return level === '高' ? '#63B995' : (level === '中' ? '#F2A25C' : '#E87575');
+        }
+
+        function computeArchetype(results) {
+            const rule = archetypeRules.find(r => r.test(results));
+            return rule ? rule.name : '平衡探索者';
+        }
+
+        function generateOverallPortrait(results) {
+            const dims = ['O', 'C', 'E', 'A', 'N'];
+            const phrases = dims.map(d => overallPortrait[d][results[d].level]);
+            return `你像是一个${phrases[0]}的人。${phrases[2]}；${phrases[3]}。同时你${phrases[1]}，而${phrases[4]}。`;
+        }
+
+        function computeTotalScore(results) {
+            return Object.values(results).reduce((sum, r) => sum + r.total, 0).toFixed(1);
+        }
+
+        function getKeywords(results) {
+            const map = {
+                O: { 高: '探索欲', 中: '务实', 低: '稳健' },
+                C: { 高: '责任感', 中: '灵活', 低: '随性' },
+                E: { 高: '外向', 中: '平衡', 低: '内省' },
+                A: { 高: '共情', 中: '独立', 低: '理性' },
+                N: { 高: '敏感', 中: '真实', 低: '稳定' }
+            };
+            const keywords = [];
+            ['O', 'C', 'E', 'A', 'N'].forEach(d => {
+                keywords.push(map[d][results[d].level]);
+            });
+            return [...new Set(keywords)];
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // =====================================================
+        // 3. 渲染函数
+        // =====================================================
+
+        function renderHero() {
+            const archetype = computeArchetype(appState.results);
+            const portrait = generateOverallPortrait(appState.results);
+            const totalScore = computeTotalScore(appState.results);
+
+            document.getElementById('hero-archetype').textContent = archetype;
+            document.getElementById('hero-summary').textContent = portrait;
+            document.getElementById('hero-score').textContent = totalScore;
+        }
+
+        function renderOverview() {
+            const archetype = computeArchetype(appState.results);
+            const portrait = generateOverallPortrait(appState.results);
+            const keywords = getKeywords(appState.results);
+            const totalScore = computeTotalScore(appState.results);
+
+            document.getElementById('overview-archetype').textContent = archetype;
+            document.getElementById('overview-summary').textContent = portrait;
+            document.getElementById('overview-score').textContent = totalScore;
+
+            const keywordColors = ['bg-brand-primary/10 text-brand-primary', 'bg-brand-auxiliary/10 text-brand-auxiliary', 'bg-brand-warm/10 text-brand-warm', 'bg-brand-coral/10 text-brand-coral', 'bg-brand-primary/10 text-brand-primary'];
+            const container = document.getElementById('overview-keywords');
+            container.innerHTML = keywords.map((kw, i) => `
+                <span class="tag-pill ${keywordColors[i % keywordColors.length]}">${escapeHtml(kw)}</span>
+            `).join('');
+        }
+
+        function initRadarChart() {
+            const ctx = document.getElementById('radar-chart').getContext('2d');
+            const labels = ['开放性', '尽责性', '外向性', '宜人性', '神经质'];
+            const data = ['O', 'C', 'E', 'A', 'N'].map(d => appState.results[d].total);
+            const pointColors = data.map((_, i) => i === appState.activeDimensionIndex ? '#4A88D8' : 'rgba(74, 136, 216, 0.5)');
+            const pointRadii = data.map((_, i) => i === appState.activeDimensionIndex ? 8 : 4);
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '你的得分',
+                        data: data,
+                        backgroundColor: 'rgba(74, 136, 216, 0.18)',
+                        borderColor: '#4A88D8',
+                        borderWidth: 2,
+                        pointBackgroundColor: pointColors,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: pointRadii,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            min: 5,
+                            max: 20,
+                            ticks: {
+                                stepSize: 5,
+                                backdropColor: 'transparent',
+                                color: '#9CA3AF',
+                                font: { size: 11 }
+                            },
+                            grid: {
+                                color: 'rgba(74, 136, 216, 0.08)'
+                            },
+                            angleLines: {
+                                color: 'rgba(74, 136, 216, 0.1)'
+                            },
+                            pointLabels: {
+                                font: { size: 13, weight: '500' },
+                                color: (ctx) => {
+                                    return ctx.index === appState.activeDimensionIndex ? '#4A88D8' : '#6B7280';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateRadarHighlight() {
+            if (!radarChart) return;
+            const count = 5;
+            const newPointColors = Array.from({ length: count }, (_, i) =>
+                i === appState.activeDimensionIndex ? '#4A88D8' : 'rgba(74, 136, 216, 0.35)'
+            );
+            const newPointRadii = Array.from({ length: count }, (_, i) =>
+                i === appState.activeDimensionIndex ? 8 : 4
+            );
+            radarChart.data.datasets[0].pointBackgroundColor = newPointColors;
+            radarChart.data.datasets[0].pointRadius = newPointRadii;
+            radarChart.update();
+        }
+
+        function renderDimensionCarousel() {
+            const track = document.getElementById('dimension-carousel');
+            const dots = document.getElementById('dim-dots');
+            const dims = ['O', 'C', 'E', 'A', 'N'];
+
+            track.innerHTML = dims.map((d, i) => {
+                const dim = dimensionData[d];
+                const result = appState.results[d];
+                const profile = dim.levels[result.level];
+                const levelClass = getLevelClass(result.level);
+
+                return `
+                    <div class="carousel-slide ${i === appState.activeDimensionIndex ? 'active' : ''}" data-index="${i}">
+                        <div class="glass rounded-3xl p-6 md:p-10 mx-1">
+                            <!-- 头部 -->
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background: ${dim.color}15;">
+                                        <i data-lucide="${dim.icon}" class="w-6 h-6" style="color: ${dim.color};"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-gray-800">${dim.name} <span class="text-base font-normal text-gray-400">${dim.nameEn}</span></h3>
+                                        <p class="text-sm text-gray-500">维度 ${i + 1} / 5</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="level-badge ${levelClass}">${result.level}</span>
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold" style="color: ${dim.color};">${result.total.toFixed(1)}</p>
+                                        <p class="text-xs text-gray-400">总分 / 20</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tagline -->
+                            <div class="mb-8">
+                                <p class="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">${escapeHtml(profile.tagline)}</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- 左列 -->
+                                <div class="space-y-6">
+                                    <div class="bg-white/60 rounded-2xl p-5">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                                            <i data-lucide="info" class="w-4 h-4 text-brand-primary"></i>
+                                            这个维度在说什么
+                                        </h4>
+                                        <p class="text-gray-600 leading-relaxed text-sm">${escapeHtml(profile.definition)}</p>
+                                    </div>
+
+                                    <div class="bg-white/60 rounded-2xl p-5">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                                            <i data-lucide="school" class="w-4 h-4 text-brand-primary"></i>
+                                            在大学生活里
+                                        </h4>
+                                        <ul class="space-y-2">
+                                            ${profile.campus.map(item => `
+                                                <li class="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
+                                                    <span class="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style="background: ${dim.color};"></span>
+                                                    ${escapeHtml(item)}
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- 右列 -->
+                                <div class="space-y-6">
+                                    <div class="rounded-2xl p-5 bg-brand-auxiliary/10">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-brand-auxiliary mb-2">
+                                            <i data-lucide="gift" class="w-4 h-4"></i>
+                                            礼物
+                                        </h4>
+                                        <p class="text-sm text-gray-700 leading-relaxed">${escapeHtml(profile.gifts)}</p>
+                                    </div>
+
+                                    <div class="rounded-2xl p-5 bg-brand-warm/10">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-brand-warm mb-2">
+                                            <i data-lucide="cloud-moon" class="w-4 h-4"></i>
+                                            阴影
+                                        </h4>
+                                        <p class="text-sm text-gray-700 leading-relaxed">${escapeHtml(profile.shadows)}</p>
+                                    </div>
+
+                                    <div class="rounded-2xl p-5 border border-brand-primary/20 bg-brand-primary/5">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-brand-primary mb-2">
+                                            <i data-lucide="lightbulb" class="w-4 h-4"></i>
+                                            一个小提醒
+                                        </h4>
+                                        <p class="text-sm text-gray-700 leading-relaxed italic">${escapeHtml(profile.tip)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 圆点
+            dots.innerHTML = dims.map((_, i) => `
+                <button class="w-2.5 h-2.5 rounded-full transition-all ${i === appState.activeDimensionIndex ? 'bg-brand-primary w-6' : 'bg-gray-300 hover:bg-gray-400'}" data-index="${i}" aria-label="切换到第 ${i + 1} 个维度"></button>
+            `).join('');
+
+            // 重新初始化该区域的 lucide 图标
+            lucide.createIcons({ nodes: track.querySelectorAll('[data-lucide]') });
+            lucide.createIcons({ nodes: dots });
+
+            // 更新 transform
+            updateCarouselTransform();
+        }
+
+        function updateCarouselTransform() {
+            const track = document.getElementById('dimension-carousel');
+            track.style.transform = `translateX(-${appState.activeDimensionIndex * 100}%)`;
+
+            // 更新 active class
+            const slides = track.querySelectorAll('.carousel-slide');
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === appState.activeDimensionIndex);
+            });
+
+            // 更新圆点
+            const dotButtons = document.getElementById('dim-dots').querySelectorAll('button');
+            dotButtons.forEach((btn, i) => {
+                if (i === appState.activeDimensionIndex) {
+                    btn.className = 'w-2.5 h-2.5 rounded-full transition-all bg-brand-primary w-6';
+                } else {
+                    btn.className = 'w-2.5 h-2.5 rounded-full transition-all bg-gray-300 hover:bg-gray-400';
+                }
+            });
+        }
+
+        function goToDimension(index) {
+            const count = 5;
+            appState.activeDimensionIndex = Math.max(0, Math.min(count - 1, index));
+            updateCarouselTransform();
+            updateRadarHighlight();
+        }
+
+        function nextDimension() {
+            goToDimension(appState.activeDimensionIndex + 1);
+        }
+
+        function prevDimension() {
+            goToDimension(appState.activeDimensionIndex - 1);
+        }
+
+        function renderAISuggestions() {
+            const container = document.getElementById('ai-suggestions');
+            container.innerHTML = aiSuggestions.map(item => `
+                <div class="reveal glass rounded-3xl p-7 card-float">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${item.bg} flex items-center justify-center mb-5">
+                        <i data-lucide="${item.icon}" class="w-6 h-6 text-${item.color}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">${escapeHtml(item.title)}</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm">${escapeHtml(item.content)}</p>
+                </div>
+            `).join('');
+
+            // 让 stagger 动画生效
+            container.querySelectorAll('.reveal').forEach((el, i) => {
+                el.classList.add(`reveal-delay-${Math.min(i + 1, 4)}`);
+            });
+        }
+
+        function renderOpenTextSummary() {
+            const dims = appState.openText.dimensions.map(d => dimensionData[d].name).join('、');
+            const text = `${appState.openText.note} 主要分布在${dims}两个维度。`;
+            document.getElementById('open-text-content').textContent = text;
+        }
+
+        function renderChatAgent() {
+            const quickActions = document.getElementById('chat-quick-actions');
+            quickActions.innerHTML = chatQuickActions.map(action => `
+                <button onclick="handleQuickAction('${action.label}', '${action.prompt}')" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/70 hover:bg-white border border-gray-100 text-xs text-gray-600 hover:text-brand-primary transition-colors text-left">
+                    <i data-lucide="${action.icon}" class="w-3.5 h-3.5"></i>
+                    ${escapeHtml(action.label)}
+                </button>
+            `).join('');
+            lucide.createIcons({ nodes: quickActions });
+        }
+
+        // =====================================================
+        // 4. 聊天交互
+        // =====================================================
+
+        const chatState = {
+            isOpen: false,
+            messages: []
+        };
+
+        function toggleChat(open) {
+            chatState.isOpen = open;
+            const win = document.getElementById('chat-window');
+            const btn = document.getElementById('chat-toggle');
+            if (open) {
+                win.classList.add('open');
+                btn.classList.add('hidden');
+                document.getElementById('chat-input').focus();
+            } else {
+                win.classList.remove('open');
+                btn.classList.remove('hidden');
+            }
+        }
+
+        function appendMessage(role, content) {
+            const container = document.getElementById('chat-messages');
+            const isUser = role === 'user';
+            const html = `
+                <div class="flex gap-3 ${isUser ? 'flex-row-reverse' : ''}">
+                    ${isUser ? '' : `
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                        </div>
+                    `}
+                    <div class="${isUser ? 'bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-tr-sm' : 'bg-brand-primary/10 text-gray-700 rounded-2xl rounded-tl-sm'} px-4 py-3 max-w-[85%] text-sm leading-relaxed shadow-sm">
+                        ${escapeHtml(content)}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            if (!isUser) lucide.createIcons({ nodes: container.lastElementChild });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function getMockReply(input) {
+            const lower = input.toLowerCase();
+            if (lower.includes('职业') || lower.includes('工作') || lower.includes('适合')) return mockReplies['职业建议'];
+            if (lower.includes('学习') || lower.includes('计划') || lower.includes('规划')) return mockReplies['学习规划'];
+            if (lower.includes('人际') || lower.includes('关系') || lower.includes('朋友') || lower.includes('社交')) return mockReplies['人际关系'];
+            if (lower.includes('情绪') || lower.includes('焦虑') || lower.includes('压力') || lower.includes('难过')) return mockReplies['情绪支持'];
+            return mockReplies['default'];
+        }
+
+        function handleQuickAction(label, prompt) {
+            appendMessage('user', prompt);
+            const reply = mockReplies[label] || mockReplies['default'];
+            setTimeout(() => appendMessage('assistant', reply), 600);
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendMessage('user', text);
+            input.value = '';
+
+            if (USE_MOCK_AI) {
+                setTimeout(() => {
+                    appendMessage('assistant', getMockReply(text));
+                }, 800);
+            } else {
+                // TODO: 接入真实 API
+                // fetch('/api/chat', { method: 'POST', body: JSON.stringify({ messages: chatState.messages, profile: appState.results }) })
+            }
+        }
+
+        // =====================================================
+        // 5. 滚动渐显初始化
+        // =====================================================
+
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.12,
+                rootMargin: '0px 0px -40px 0px'
+            });
+
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        }
+
+        // =====================================================
+        // 6. 触摸滑动支持
+        // =====================================================
+
+        function initSwipe() {
+            const track = document.getElementById('dimension-carousel');
+            let startX = 0;
+            let isDragging = false;
+
+            track.addEventListener('touchstart', e => {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+            }, { passive: true });
+
+            track.addEventListener('touchend', e => {
+                if (!isDragging) return;
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) nextDimension();
+                    else prevDimension();
+                }
+                isDragging = false;
+            }, { passive: true });
+        }
+
+        // =====================================================
+        // 7. 初始化入口
+        // =====================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. 数据注入点：如果后端注入了 window.__REPORT_DATA__，则覆盖 appState.results
+            if (window.__REPORT_DATA__) {
+                appState.results = window.__REPORT_DATA__.results || appState.results;
+                appState.openText = window.__REPORT_DATA__.openText || appState.openText;
+                appState.user = window.__REPORT_DATA__.user || appState.user;
+            }
+
+            // 2. 渲染所有区块
+            renderHero();
+            renderOverview();
+            initRadarChart();
+            renderDimensionCarousel();
+            renderAISuggestions();
+            renderOpenTextSummary();
+            renderChatAgent();
+
+            // 3. 初始化图标
+            lucide.createIcons();
+
+            // 4. 滚动渐显
+            initScrollReveal();
+
+            // 5. 轮播事件
+            document.getElementById('prev-dim').addEventListener('click', prevDimension);
+            document.getElementById('next-dim').addEventListener('click', nextDimension);
+            document.getElementById('dim-dots').addEventListener('click', e => {
+                const btn = e.target.closest('button');
+                if (btn) goToDimension(parseInt(btn.dataset.index, 10));
+            });
+
+            // 6. 触摸滑动
+            initSwipe();
+
+            // 7. 聊天事件
+            document.getElementById('chat-toggle').addEventListener('click', () => toggleChat(true));
+            document.getElementById('chat-close').addEventListener('click', () => toggleChat(false));
+            document.getElementById('chat-send').addEventListener('click', sendChatMessage);
+
+            // 点击外部关闭聊天（可选）
+            document.addEventListener('click', e => {
+                const win = document.getElementById('chat-window');
+                const btn = document.getElementById('chat-toggle');
+                if (chatState.isOpen && !win.contains(e.target) && !btn.contains(e.target)) {
+                    toggleChat(false);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

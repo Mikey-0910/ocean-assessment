@@ -1,0 +1,2314 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCEAN 人格情境测评</title>
+
+    <!-- Tailwind CSS v3 Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config: 品牌色、字体、阴影 -->
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false,
+                container: false
+            },
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#4A88D8',
+                            'primary-light': '#7BA8E8',
+                            'primary-dark': '#3568B0',
+                            auxiliary: '#63B995',
+                            'auxiliary-light': '#8FD4B8',
+                            warm: '#F2A25C',
+                            'warm-light': '#F7BE8C',
+                            coral: '#E87575',
+                            'coral-light': '#F2A0A0',
+                            bg: '#F7F8FA',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px rgba(74, 136, 216, 0.08)',
+                        'lift': '0 12px 40px rgba(74, 136, 216, 0.15)',
+                        'glow': '0 0 60px rgba(74, 136, 216, 0.12)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #718096;
+        }
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 0 16px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        .question-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        .question-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .option.selected {
+            border-color: #667eea;
+            background: #e6eeff;
+        }
+        .option-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 12px;
+            min-width: 24px;
+        }
+        .option-text {
+            flex: 1;
+            line-height: 1.5;
+        }
+        .open-text-area {
+            margin-top: 16px;
+        }
+        .open-text-area textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .open-text-area textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: #edf2f7;
+            color: #4a5568;
+            margin-right: 12px;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+        }
+        .welcome-text {
+            line-height: 1.8;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+        .welcome-text ul {
+            margin: 12px 0 12px 24px;
+        }
+        .welcome-text li {
+            margin-bottom: 8px;
+        }
+        .red-line {
+            background: #fff5f5;
+            border-left: 4px solid #fc8181;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            color: #c53030;
+            font-size: 14px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .safety-notice {
+            background: #fffaf0;
+            border: 1px solid #fbd38d;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 20px;
+            color: #744210;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .question-text {
+                font-size: 16px;
+            }
+        }
+
+        /* ===== 报告模式：覆盖 body 与隐藏测评容器 ===== */
+        body.report-mode {
+            background: #F7F8FA;
+            padding: 0;
+        }
+        body.report-mode .container {
+            display: none;
+        }
+
+        /* ===== 基础 ===== */
+        html {
+            scroll-behavior: smooth;
+        }
+        #result-page {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background-color: #F7F8FA;
+            color: #1F2937;
+            overflow-x: hidden;
+        }
+
+        /* ===== 背景光斑 ===== */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.45;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .blob-blue {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(74, 136, 216, 0.35), transparent 70%);
+            top: -150px;
+            right: -150px;
+        }
+        .blob-teal {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 185, 149, 0.3), transparent 70%);
+            top: 40%;
+            left: -120px;
+        }
+        .blob-warm {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(242, 162, 92, 0.25), transparent 70%);
+            bottom: 10%;
+            right: -100px;
+        }
+
+        /* ===== 玻璃卡片 ===== */
+        .glass {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(74, 136, 216, 0.08);
+        }
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        /* ===== 卡片悬浮 ===== */
+        .card-float {
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+        }
+        .card-float:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(74, 136, 216, 0.14);
+        }
+
+        /* ===== 按钮微弹 ===== */
+        .btn-bounce {
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+        }
+        .btn-bounce:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(74, 136, 216, 0.28);
+        }
+        .btn-bounce:active {
+            transform: scale(0.97);
+        }
+
+        /* ===== 滚动渐显 ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* ===== Hero 初始动画 ===== */
+        .hero-fade {
+            opacity: 0;
+            transform: translateY(24px);
+            animation: heroFadeIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .hero-fade-delay-1 { animation-delay: 0.15s; }
+        .hero-fade-delay-2 { animation-delay: 0.3s; }
+        .hero-fade-delay-3 { animation-delay: 0.45s; }
+        .hero-fade-delay-4 { animation-delay: 0.6s; }
+
+        @keyframes heroFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-anim {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        /* ===== 轮播 ===== */
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .carousel-slide {
+            min-width: 100%;
+            opacity: 0.4;
+            transform: scale(0.96);
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .carousel-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* ===== 聊天窗口动画 ===== */
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 380px;
+            max-height: 640px;
+            border-radius: 24px;
+            opacity: 0;
+            transform: scale(0.92) translateY(20px);
+            transform-origin: bottom right;
+            pointer-events: none;
+            transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 50;
+        }
+        .chat-window.open {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        /* ===== 标签徽章 ===== */
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        .tag-pill:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ===== 等级徽章 ===== */
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .level-high { background: rgba(99, 185, 149, 0.14); color: #2D8A68; }
+        .level-mid { background: rgba(242, 162, 92, 0.14); color: #C77A2E; }
+        .level-low { background: rgba(232, 117, 117, 0.14); color: #C04848; }
+
+        /* ===== 自定义滚动条 ===== */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(74, 136, 216, 0.2);
+            border-radius: 3px;
+        }
+
+        /* ===== 响应式：手机聊天窗口 ===== */
+        @media (max-width: 640px) {
+            .chat-window {
+                width: calc(100% - 32px);
+                right: 16px;
+                bottom: 80px;
+                border-radius: 20px;
+                transform-origin: bottom center;
+            }
+            .blob {
+                opacity: 0.3;
+            }
+        }
+
+        /* ===== 折叠卡 ===== */
+        details > summary {
+            list-style: none;
+            cursor: pointer;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] .chevron {
+            transform: rotate(180deg);
+        }
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+
+        /* ===== 输入框焦点 ===== */
+        .input-glow:focus {
+            outline: none;
+            border-color: #4A88D8;
+            box-shadow: 0 0 0 3px rgba(74, 136, 216, 0.12);
+        }
+
+        /* ===== 打印样式 ===== */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            .blob,
+            #chat-toggle,
+            #chat-window,
+            .report-action-bar .btn-bounce {
+                display: none !important;
+            }
+            #result-page section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            .glass,
+            .glass-strong {
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 首页 -->
+        <div id="welcome-page">
+            <h1>OCEAN 人格情境测评</h1>
+            <p class="subtitle">25 道情境题 · 选项不符可用自然语言补充 · 结果仅供参考</p>
+
+            <div class="card">
+                <div class="welcome-text">
+                    <p>欢迎来到人格测评补充说明 Agent。本测评包含 25 道情境选择题，每题有 A/B/C/D 四个选项：</p>
+                    <ul>
+                        <li><strong>A</strong>：非常符合 / 强烈倾向</li>
+                        <li><strong>B</strong>：比较符合 / 一般倾向</li>
+                        <li><strong>C</strong>：不太符合 / 轻微倾向</li>
+                        <li><strong>D</strong>：很不符合 / 没有倾向</li>
+                        <li><strong>E</strong>：以上都不符合，我想自己说明</li>
+                    </ul>
+                    <p>如果你选择 E，请用一句话描述你在该情境下的真实反应。系统会按评分标准对补充说明赋分。</p>
+                </div>
+
+                <div class="red-line">
+                    <strong>重要提示：</strong> 本测评结果仅供自我理解参考，不诊断任何心理疾病，不替代专业心理咨询。如果你在测评过程中出现自伤、自杀或伤害他人的念头，请立即停止并联系专业人士：全国 24 小时心理援助热线 400-161-9995。
+                </div>
+
+                <div class="btn-group">
+                    <div></div>
+                    <button class="btn btn-primary" onclick="startAssessment()">开始测评</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测评页 -->
+        <div id="assessment-page" class="hidden">
+            <h1>OCEAN 人格情境测评</h1>
+            <p class="subtitle">请根据你的真实反应选择</p>
+
+            <div class="card">
+                <div class="progress">
+                    <span>第 <span id="current-num">1</span> / 25 题</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 4%"></div>
+                    </div>
+                    <span id="progress-percent">4%</span>
+                </div>
+
+                <div id="question-container">
+                    <!-- 题目内容会动态插入 -->
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>上一题</button>
+                    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>下一题</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 新结果页：Premium Report ==================== -->
+    <div id="result-page" class="hidden">
+        <!-- 动态 Tailwind 类预声明（供 Play CDN 扫描） -->
+        <div class="hidden text-brand-primary text-brand-auxiliary text-brand-warm text-brand-coral bg-brand-primary/10 bg-brand-auxiliary/10 bg-brand-warm/10 bg-brand-coral/10 bg-gradient-to-br from-brand-primary/10 to-brand-primary/5 from-brand-auxiliary/10 to-brand-auxiliary/5 from-brand-warm/10 to-brand-warm/5"></div>
+
+        <!-- 背景光斑 -->
+        <div class="blob blob-blue"></div>
+        <div class="blob blob-teal"></div>
+        <div class="blob blob-warm"></div>
+
+        <!-- 页面内容 -->
+        <main class="relative z-10">
+
+            <!-- ==================== Hero ==================== -->
+            <section id="hero" class="min-h-screen flex items-center justify-center px-6 py-20">
+                <div class="max-w-4xl mx-auto text-center">
+                    <!-- 欢迎标签 -->
+                    <div class="hero-fade inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
+                        <i data-lucide="hand" class="w-4 h-4 text-brand-primary"></i>
+                        <span class="text-sm font-medium text-gray-600">测评完成</span>
+                    </div>
+
+                    <!-- 主标题 -->
+                    <h1 class="hero-fade hero-fade-delay-1 text-4xl md:text-6xl font-bold text-gray-800 leading-tight mb-6">
+                        今天，我们重新认识了一次自己
+                    </h1>
+
+                    <!-- 副标题 -->
+                    <p class="hero-fade hero-fade-delay-2 text-xl md:text-2xl text-gray-500 font-light leading-relaxed mb-12">
+                        人格不是标签，<br class="md:hidden">而是理解自己的起点
+                    </p>
+
+                    <!-- 综合画像卡片 -->
+                    <div class="hero-fade hero-fade-delay-3 max-w-xl mx-auto mb-12">
+                        <div class="glass rounded-3xl p-8 md:p-10 card-float float-anim relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-brand-primary/10 to-brand-auxiliary/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+
+                            <div class="relative z-10">
+                                <p class="text-sm text-gray-500 mb-2">你的综合画像</p>
+                                <h2 id="hero-archetype" class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">平衡探索者</h2>
+                                <p id="hero-summary" class="text-gray-600 leading-relaxed mb-6">你像是一个带着好奇心观察世界的人。你是一盏需要从人群中获取能量的灯；你天生容易感知到别人的情绪。同时你懂得规划，也懂得灵活，而大多数时候情绪稳定，但压力来了也会波动。</p>
+
+                                <div class="flex items-center justify-center gap-4">
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-brand-primary" id="hero-score">73.5</p>
+                                        <p class="text-xs text-gray-400">综合得分</p>
+                                    </div>
+                                    <div class="w-px h-10 bg-gray-200"></div>
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-brand-auxiliary">5</p>
+                                        <p class="text-xs text-gray-400">维度</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 报告操作栏 -->
+                    <div class="hero-fade hero-fade-delay-4 report-action-bar flex flex-wrap items-center justify-center gap-3 mb-10">
+                        <button onclick="restartAssessment()" class="btn-bounce inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-700 border border-gray-200 rounded-full font-medium hover:bg-gray-50 transition-colors">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                            重新测评
+                        </button>
+                        <button onclick="window.print()" class="btn-bounce inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-700 border border-gray-200 rounded-full font-medium hover:bg-gray-50 transition-colors">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            打印报告
+                        </button>
+                        <button onclick="copyProfileData()" class="btn-bounce inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-full font-medium hover:bg-brand-primary-dark transition-colors shadow-lift">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                            复制数据
+                        </button>
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="hero-fade hero-fade-delay-4">
+                        <button onclick="scrollToSection('overview')" class="btn-bounce inline-flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-full font-medium text-lg shadow-lift hover:bg-brand-primary-dark transition-colors">
+                            开始查看报告
+                            <i data-lucide="arrow-down" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== 人格总览 ==================== -->
+            <section id="overview" class="py-24 px-6">
+                <div class="max-w-6xl mx-auto">
+                    <div class="reveal mb-12">
+                        <p class="text-sm font-medium text-brand-primary mb-2">人格总览</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">看见自己的形状</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        <!-- 左侧：雷达图 -->
+                        <div class="reveal reveal-delay-1 lg:col-span-7">
+                            <div class="glass rounded-3xl p-6 md:p-10 card-float">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="text-lg font-semibold text-gray-700">五维雷达图</h3>
+                                    <span class="text-xs text-gray-400">分数范围 5-20</span>
+                                </div>
+                                <div class="relative w-full max-w-md mx-auto aspect-square">
+                                    <canvas id="radar-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右侧：总结卡 -->
+                        <div class="reveal reveal-delay-2 lg:col-span-5 space-y-6">
+                            <div class="glass rounded-3xl p-8">
+                                <p class="text-sm text-gray-500 mb-2">你是一位</p>
+                                <h3 id="overview-archetype" class="text-3xl font-bold text-gray-800 mb-4">平衡探索者</h3>
+                                <p id="overview-summary" class="text-gray-600 leading-relaxed mb-6">你像是一个带着好奇心观察世界的人。你是一盏需要从人群中获取能量的灯；你天生容易感知到别人的情绪。同时你懂得规划，也懂得灵活。</p>
+
+                                <div id="overview-keywords" class="flex flex-wrap gap-2 mb-6">
+                                    <!-- 关键词标签由 JS 生成 -->
+                                </div>
+
+                                <div class="bg-gradient-to-r from-brand-primary/10 to-brand-auxiliary/10 rounded-2xl p-5">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-500 mb-1">总体评分</p>
+                                            <p id="overview-score" class="text-3xl font-bold text-brand-primary">73.5</p>
+                                        </div>
+                                        <div class="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center">
+                                            <i data-lucide="sparkles" class="w-6 h-6 text-brand-primary"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== 人格维度轮播 ==================== -->
+            <section id="dimensions" class="py-24 px-6">
+                <div class="max-w-5xl mx-auto">
+                    <div class="reveal text-center mb-12">
+                        <p class="text-sm font-medium text-brand-primary mb-2">人格维度</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">五个面向，一个你</h2>
+                        <p class="text-gray-500">左右切换，深入了解每一个维度</p>
+                    </div>
+
+                    <div class="reveal reveal-delay-1 relative">
+                        <!-- 轮播容器 -->
+                        <div class="overflow-hidden rounded-3xl">
+                            <div id="dimension-carousel" class="carousel-track">
+                                <!-- 轮播卡片由 JS 生成 -->
+                            </div>
+                        </div>
+
+                        <!-- 左右箭头 -->
+                        <button id="prev-dim" class="absolute left-0 md:-left-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass flex items-center justify-center text-gray-600 hover:text-brand-primary hover:shadow-lift transition-all z-20 hidden md:flex">
+                            <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                        </button>
+                        <button id="next-dim" class="absolute right-0 md:-right-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass flex items-center justify-center text-gray-600 hover:text-brand-primary hover:shadow-lift transition-all z-20 hidden md:flex">
+                            <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                        </button>
+
+                        <!-- 圆点分页 -->
+                        <div id="dim-dots" class="flex items-center justify-center gap-2 mt-8">
+                            <!-- 圆点由 JS 生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 移动端滑动提示 -->
+                    <p class="md:hidden text-center text-sm text-gray-400 mt-4 flex items-center justify-center gap-1">
+                        <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+                        左右滑动切换维度
+                    </p>
+                </div>
+            </section>
+
+            <!-- ==================== AI 建议 ==================== -->
+            <section id="suggestions" class="py-24 px-6">
+                <div class="max-w-6xl mx-auto">
+                    <div class="reveal text-center mb-12">
+                        <p class="text-sm font-medium text-brand-primary mb-2">AI 给你的建议</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">为你量身定制的成长指南</h2>
+                        <p class="text-gray-500">基于你的测评结果，这里有三条温柔提醒</p>
+                    </div>
+
+                    <div id="ai-suggestions" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- 建议卡片由 JS 生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== 开放题说明 ==================== -->
+            <section id="open-text" class="py-16 px-6">
+                <div class="max-w-3xl mx-auto">
+                    <details class="reveal glass rounded-2xl overflow-hidden" open>
+                        <summary class="flex items-center justify-between p-6 text-gray-600 hover:text-gray-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="message-square-plus" class="w-5 h-5 text-brand-primary"></i>
+                                <span class="font-medium">开放题说明</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-5 h-5 chevron"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-4">
+                            <p id="open-text-content">本次测评中，你有 0 道题使用了开放说明。若使用开放说明，系统会按评分标准纳入对应维度总分。若后端不可用，系统会自动降级为本地规则评分，结果仅供参考。</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- 温馨提示 -->
+            <section class="py-8 px-6">
+                <div class="max-w-3xl mx-auto text-center">
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        测评结果只是你当前状态的一个参考，不是永久标签，也不是专业诊断。如果你对结果感到困惑或焦虑，建议与信任的朋友聊聊，或联系学校心理咨询中心。
+                    </p>
+                </div>
+            </section>
+
+            <!-- ==================== 底部留白 ==================== -->
+            <div class="h-32"></div>
+        </main>
+    </div>
+
+    <!-- ==================== AI 人格 Agent ==================== -->
+    <!-- 悬浮按钮 -->
+    <button id="chat-toggle" class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lift flex items-center justify-center z-50 btn-bounce hidden" aria-label="打开人格成长助手">
+        <i data-lucide="message-circle" class="w-6 h-6"></i>
+    </button>
+
+    <!-- 聊天窗口 -->
+    <div id="chat-window" class="chat-window glass-strong shadow-lift flex flex-col overflow-hidden" role="dialog" aria-label="人格成长助手">
+        <!-- 头部 -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center">
+                    <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800">人格成长助手</p>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-gray-500">在线</span>
+                    </div>
+                </div>
+            </div>
+            <button id="chat-close" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors" aria-label="关闭">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- 消息区 -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 custom-scroll">
+            <!-- 欢迎语 -->
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                </div>
+                <div class="bg-brand-primary/10 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                    <p class="text-sm text-gray-700 leading-relaxed">你好，我已经阅读了你的测评结果。你可以问我关于职业方向、学习风格、人际策略或情绪调节的问题，我会基于你的画像给出参考建议。</p>
+                </div>
+            </div>
+
+            <!-- 快捷按钮 -->
+            <div id="chat-quick-actions" class="grid grid-cols-2 gap-2 pl-11">
+                <!-- 由 JS 生成 -->
+            </div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="p-4 border-t border-gray-100 bg-white/50">
+            <div class="flex items-center gap-2">
+                <input id="chat-input" type="text" placeholder="输入你的问题..." class="flex-1 px-4 py-3 rounded-full border border-gray-200 bg-white text-sm input-glow transition-all" onkeypress="if(event.key==='Enter') sendChatMessage()">
+                <button id="chat-send" class="w-11 h-11 rounded-full bg-brand-primary text-white flex items-center justify-center hover:bg-brand-primary-dark transition-colors flex-shrink-0">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 题库数据
+        const questions = [
+            // O - 开放性
+            { id: 1, dimension: "O", scenario: "旅行规划", text: "即将到来的长假，朋友提议去一个你从未去过且文化差异很大的国家旅行，你的第一反应是？", prompt: "请描述你面对全新、陌生体验时的典型反应。" },
+            { id: 2, dimension: "O", scenario: "艺术展览", text: "路过一家美术馆，正在展出一组风格抽象、晦涩难懂的现代艺术展，你会？", prompt: "请说明你对抽象艺术或陌生事物的态度。" },
+            { id: 3, dimension: "O", scenario: "学习平台", text: "学校引入了一套全新的、使用方式变化很大的学习管理系统（如在线选课、提交作业、查成绩一体化平台），你需要从头学习，你会？", prompt: "请描述你面对学习中重大变化时的反应。" },
+            { id: 4, dimension: "O", scenario: "电影选择", text: "周末晚上选电影，你面前有一部逻辑烧脑的科幻片和一部情节简单的喜剧片，你倾向于？", prompt: "请说明你偏好的电影或阅读类型。" },
+            { id: 5, dimension: "O", scenario: "观点讨论", text: "在饭桌上，大家开始讨论一个极具争议的社会伦理问题（如AI伦理），你会？", prompt: "请描述你面对抽象或争议性话题时的倾向。" },
+            // C - 尽责性
+            { id: 6, dimension: "C", scenario: "面对deadline", text: "老师布置了一个两周后截止的重要课程项目（如课程大作业、小组报告），你会？", prompt: "请描述你管理长期任务的方式。" },
+            { id: 7, dimension: "C", scenario: "桌面环境", text: "你的书桌或书架现在的状态是？", prompt: "请描述你保持整洁或处理琐事的习惯。" },
+            { id: 8, dimension: "C", scenario: "购物清单", text: "你去超市买东西之前，通常会？", prompt: "请描述你做计划或购物时的习惯。" },
+            { id: 9, dimension: "C", scenario: "承诺兑现", text: "你答应朋友要在周五之前帮他一个忙，但周三突然来了个很好玩的活动邀请，你会？", prompt: "请描述你在面对承诺与诱惑时的选择。" },
+            { id: 10, dimension: "C", scenario: "学习细节", text: "你在撰写一份课程论文/实验报告，发现里面有一个错别字，但不太明显，你会？", prompt: "请描述你对学习细节的态度。" },
+            // E - 外向性
+            { id: 11, dimension: "E", scenario: "周末充电", text: "经过了一周高压且忙碌的学习/考试周，周五晚上你感到精疲力尽，你希望如何度过周末？", prompt: "请描述你疲惫时偏好的恢复方式。" },
+            { id: 12, dimension: "E", scenario: "陌生聚会", text: "你被拉进一个全是陌生人的社交场合（如社团招新、新生联谊），你的状态通常是？", prompt: "请描述你在陌生社交场合的典型表现。" },
+            { id: 13, dimension: "E", scenario: "表达方式", text: "在课堂讨论或小组汇报中，你有一个很好的想法，你会？", prompt: "请描述你在团队中表达观点的方式。" },
+            { id: 14, dimension: "E", scenario: "成为焦点", text: "在生日派对上，大家突然为你唱生日歌并盯着你，你的感觉是？", prompt: "请描述你成为众人焦点时的感受。" },
+            { id: 15, dimension: "E", scenario: "沟通偏好", text: "你更倾向于哪种沟通方式来解决学习或生活中的问题？", prompt: "请描述你偏好的沟通方式。" },
+            // A - 宜人性
+            { id: 16, dimension: "A", scenario: "朋友求助", text: "一位朋友在深夜向你倾诉他学习上的烦恼（如考试失利、社团矛盾），但其实这个烦恼主要是因为他自己的失误造成的，你会？", prompt: "请描述你安慰或帮助他人时的典型方式。" },
+            { id: 17, dimension: "A", scenario: "利益冲突", text: "在小组作业中，你和队友在方案上产生了严重分歧，且你的方案明显对作业成绩更有利，你会？", prompt: "请描述你处理人际分歧的风格。" },
+            { id: 18, dimension: "A", scenario: "捡到财物", text: "你在商场捡到了一个装有贵重物品的钱包，但周围没人，你会？", prompt: "请描述你在类似情境下的第一反应。" },
+            { id: 19, dimension: "A", scenario: "电影情节", text: "看电影时，主角为了拯救爱狗而牺牲了自己宝贵的逃生机会，你会？", prompt: "请描述你看到感人情节时的反应。" },
+            { id: 20, dimension: "A", scenario: "信任初识", text: "刚认识一位新同学，他主动提出要帮你带早餐，你会？", prompt: "请描述你对陌生人善意的态度。" },
+            // N - 神经质
+            { id: 21, dimension: "N", scenario: "突发事件", text: "正准备出门时，突然发现校园卡/身份证找不到了，而你有一场非常重要的考试不能迟到，你会？", prompt: "请描述你面对突发压力时的情绪反应。" },
+            { id: 22, dimension: "N", scenario: "批评反馈", text: "老师把你叫到办公室，严肃地指出了你作业/论文中的一部分数据错误，你会？", prompt: "请描述你面对批评时的情绪反应。" },
+            { id: 23, dimension: "N", scenario: "健康疑病", text: "最近经常头痛，上网搜索了一下，发现很多重病都有头痛的症状，你会？", prompt: "请描述你对身体不适时的担忧程度。" },
+            { id: 24, dimension: "N", scenario: "公开演讲", text: "需要在一二百人的课堂汇报/课程答辩/社团活动现场发言，上台前一分钟，你会？", prompt: "请描述你在重要公开场合前的状态。" },
+            { id: 25, dimension: "N", scenario: "情绪恢复", text: "刚经历了一件很倒霉的事情（如被诈骗了钱），现在的你会？", prompt: "请描述你经历挫折后的恢复速度。" }
+        ];
+
+        const options = {
+            A: { label: "A", text: "", score: 4 },
+            B: { label: "B", text: "", score: 3 },
+            C: { label: "C", text: "", score: 2 },
+            D: { label: "D", text: "", score: 1 }
+        };
+
+        // 各题选项文本
+        const optionTexts = {
+            1: ["非常兴奋，立刻开始研究当地的风土人情，并计划去探索那些鲜为人知的角落。", "比较感兴趣，愿意去尝试，但可能会选择一些热门景点，确保行程安全舒适。", "有些犹豫，觉得去陌生的地方太麻烦，担心语言不通或饮食不习惯。", "不太想去，更愿意去一个以前去过的熟悉度假村，那样更省心、更放松。"],
+            2: ["走进去仔细欣赏，即使看不懂也会努力去感受其中的情绪和创意，并觉得很有趣。", "进去快速浏览一圈，看看有没有好看的色彩或构图，主要为了打发时间。", "站在门口犹豫，看了几眼觉得看不明白，觉得这类东西离自己生活太远。", "直接略过，觉得这是乱涂乱画，完全是浪费时间和金钱。"],
+            3: ["充满热情，主动挖掘新系统的高级功能，甚至思考如何用它优化现有流程。", "按要求学习，尽快掌握基本操作，以便能继续完成选课、交作业、查成绩等学习任务。", "略有抵触，觉得旧的系统用得挺好，为什么要变，只在不得不换时才勉强学习。", "感到厌烦，私下里抱怨不断，试图寻找各种理由推迟使用新系统。"],
+            4: ["毫不犹豫选科幻片，喜欢那种脑洞大开、引发对未来和人性思考的感觉。", "可能会选科幻片，只要评价不错就试试，但若太累也会考虑喜剧。", "倾向于选喜剧片，看电影就是为了放松，不想动脑子去理解复杂的世界观。", "坚决选喜剧片，甚至可能是一部看过的老片，不喜欢那种不切实际的幻想。"],
+            5: ["积极参与，提出一个独特的、甚至挑战常理的观点，并享受思想的碰撞。", "适度加入，倾听大家的意见，发表一些主流或中立的看法。", "保持安静，觉得这些话题太虚，不如聊聊生活琐事实在。", "感到反感，认为谈论这些没有定论的事情毫无意义，甚至试图转移话题。"],
+            6: ["立即制定详细计划，每天按进度推进，争取提前两天完成以留出检查时间。", "尽早开始，前一周做大部分工作，最后一周用来修改和完善。", "先放一放，玩几天再说，等到最后一周开始熬夜赶工。", "拖延到最后，直到截止前一晚通宵突击，能交差就行。"],
+            7: ["井井有条，所有物品分类摆放，文件按顺序归档，甚至连笔筒都朝向一致。", "基本整洁，偶尔会有几张纸乱放，但大体上能找到需要的东西。", "有点凌乱，堆放了不少杂物，找东西经常需要翻一阵子。", "非常混乱，文件、零食、电线混在一起，常常找不到东西在哪里。"],
+            8: ["列出详细清单，甚至画好超市的路线图，严格执行清单，绝不买计划外的东西。", "列个大概清单，写下必须要买的，看到如果需要且价格合适也会顺手买点别的。", "大概想一下，进门时记得住要买啥，逛着逛着就凭感觉拿了。", "完全随性，想买啥买啥，经常回家后发现忘了买最重要的东西。"],
+            9: ["拒绝邀请，既然答应了别人，必须先完成任务，诚信最重要。", "调整安排，确保先把帮朋友的事情做完，如果时间来得及再去活动。", "试图兼顾，去活动，但带着焦虑，想着晚上回来熬夜帮朋友做。", "选择活动，心想反正周五还没到，玩回来再说，或者找借口推迟给朋友。"],
+            10: ["立刻修正，并检查全文是否有类似错误，追求完美的交付成果。", "顺手改掉，觉得有错别字不好看，改了比较安心。", "犹豫一下，如果时间充裕就改，如果赶时间就算了。", "置之不理，觉得内容没问题就行，没必要在这些细节上纠缠。"],
+            11: ["呼朋唤友，去KTV、聚餐或参加派对，在热闹的人群和欢笑声中满血复活。", "社交一两次，比如约个朋友吃顿饭，或者和家人一起出去玩。", "宅家休息，看看电视、睡个懒觉，不想出门社交，也不想见太多人。", "彻底独处，关掉手机，一个人看书、散步或发呆，享受完全不被打扰的宁静。"],
+            12: ["如鱼得水，主动走向不同的人自我介绍，热情地开启话题，很快成为焦点。", "适应良好，如果有人来搭话会很愉快地交流，也会尝试加入一两个圈子。", "略显拘谨，主要呆在熟悉的人身边，或者找个角落玩手机，偶尔看看周围。", "坐立难安，感到极度不自在，找借口尽快离开，或者全程沉默不语。"],
+            13: ["大声且快速地表达出来，一边说一边用手势，情绪饱满，希望所有人都听到。", "清晰地阐述，等待合适的时机发言，逻辑清楚，声音适中。", "小声地提议，或者先私发给旁边的同学，确认没问题了再说。", "写在文档里，不喜欢口头争辩或展示，更倾向于用文字表达。"],
+            14: ["非常享受，甚至可能会趁机讲个笑话或做个搞怪动作，感觉很棒。", "有点害羞但开心，笑着感谢大家，觉得这是甜蜜的时刻。", "有些尴尬，希望快点结束，不知道手该往哪里放。", "极度不适，如果可能的话想钻到地缝里，讨厌这种被众人注视的感觉。"],
+            15: ["面对面或电话，觉得文字太冷淡，必须听到声音或看到人才能高效沟通。", "即时通讯软件（语音/文字），方便快捷，也能感受到对方的情绪。", "邮件或留言，给自己留出思考和整理的时间，不喜欢被打扰。", "尽量避免沟通，最好能自己查资料解决，或者写信条，不想有实时互动。"],
+            16: ["温柔安慰，哪怕是他错了，也先表示理解他的痛苦，不想让他更难过。", "表示同情，但也委婉地指出问题所在，希望能帮到他。", "理性分析，直接告诉他哪里做错了，应该怎么补救，觉得安慰没用。", "直言不讳，甚至有点生气地批评他太蠢了，'早就告诉过你会这样'。"],
+            17: ["主动退让，为了维护团队和谐，假装同意他的方案，不想发生争吵。", "寻求折中，建议把双方的意见融合一下，哪怕那样会降低方案的质量。", "据理力争，坚持我的观点，尝试说服他接受我的方案，但语气保持专业。", "强硬到底，直接向老师或组长汇报，或者毫不留情地反驳他的观点，一定要赢。"],
+            18: ["毫不犹豫，立刻送到失物招领处，甚至想办法联系失主，担心失主着急。", "会交上去，觉得这是应该做的，虽然可能会有点麻烦。", "犹豫片刻，看一眼里面有多少钱，虽然最终会交，但心里会有波动。", "据为己有，觉得这是运气，或者这是'谁让他不小心'的意外之财。"],
+            19: ["感动落泪，觉得这份感情太珍贵了，完全沉浸在悲伤的情绪中。", "有些感动，觉得虽然不理智，但能理解这种情感。", "觉得不值，认为人比狗重要，这种做法太冲动、太不理性了。", "感到可笑，认为这是编剧编造的煽情桥段，毫无逻辑可言。"],
+            20: ["充满感激，觉得他人真好，立刻接受并表示感谢。", "礼貌接受，觉得这是一个友好的表示，下次记得还回去就行。", "保持警惕，觉得无功不受禄，婉言拒绝或怀疑他别有用心。", "直接拒绝，觉得不喜欢欠人人情，也不相信陌生人的善意。"],
+            21: ["极度恐慌，心跳加速，手心冒汗，感到天都要塌了，完全乱了阵脚。", "非常焦急，一边抱怨一边翻箱倒柜，情绪变得很糟糕。", "有些烦躁，深吸几口气，告诉自己冷静，快速回想最后一次放哪。", "保持冷静，情绪几乎没有波动，迅速制定备用方案（如找辅导员开证明、借同学证件）。"],
+            22: ["深受打击，觉得老师是不是对我很失望，我会不会因此挂科，或者这门课要重修，为此难过好几天。", "情绪低落，虽然知道错了，但心里很委屈，觉得自己之前那么努力白费了。", "有些自责，但能调节过来，想着下次注意就好，不会太往心里去。", "坦然接受，情绪不受影响，专注于错误本身，改正后就忘了这事。"],
+            23: ["灾难化想象，坚信自己得了绝症，甚至开始写遗嘱，焦虑得睡不着觉。", "非常担忧，坐立难安，立刻想去医院做全身检查，反复确认。", "适度注意，觉得多休息就好，如果还没好再去看看医生。", "不在意，觉得可能只是没睡好，过两天自然就好了，完全不担心。"],
+            24: ["濒临崩溃，大脑一片空白，甚至想呕吐或逃跑。", "紧张焦虑，心跳很快，一直在想'万一忘词了怎么办'。", "有点紧张，深呼吸几次，这种紧张感反而让自己更集中精神。", "甚至兴奋，把它当成一个展示自己的机会，心态平和，自信满满。"],
+            25: ["深陷泥潭，这件事会在脑子里转很久，反复回想细节，几天甚至几周都处于愤怒或抑郁中。", "需要较长时间，虽然试图做别的事，但还是会时不时感到难受，需要一周左右缓解。", "较快恢复，可能会郁闷一晚上，但睡一觉或者找朋友吐槽后，第二天基本能回归正常。", "迅速翻篇，能很快接受现实（'钱没了再赚'），几乎不影响到当下的心情和生活节奏。"]
+        };
+
+        const dimensionLabels = {
+            O: "开放性 Openness",
+            C: "尽责性 Conscientiousness",
+            E: "外向性 Extraversion",
+            A: "宜人性 Agreeableness",
+            N: "神经质 Neuroticism"
+        };
+
+        // 报告页全局状态
+        const appState = {
+            user: { name: '你' },
+            reportDate: new Date().toLocaleDateString('zh-CN').replace(/\//g, '.'),
+            results: {
+                O: { total: 0, avg: 0, level: '中' },
+                C: { total: 0, avg: 0, level: '中' },
+                E: { total: 0, avg: 0, level: '中' },
+                A: { total: 0, avg: 0, level: '中' },
+                N: { total: 0, avg: 0, level: '中' }
+            },
+            openText: {
+                count: 0,
+                dimensions: [],
+                note: ''
+            },
+            activeDimensionIndex: 0
+        };
+
+        // 维度元数据 + 等级文案库
+        const dimensionData = {
+            O: {
+                key: 'O',
+                name: '开放性',
+                nameEn: 'Openness',
+                color: '#4A88D8',
+                icon: 'compass',
+                levels: {
+                    高: {
+                        tagline: '你对世界有一种「还没看完」的好奇心',
+                        definition: '对你来说，熟悉的东西容易变成背景，而陌生的、复杂的、甚至有点晦涩的东西才会吸引你的注意。你不只是想知道「是什么」，更想知道「如果…会怎样」。',
+                        campus: [
+                            '选课时会忍不住被那些「看起来很难但有意思」的通识课吸引。',
+                            '看到食堂门口一张抽象艺术展海报，你可能会停下来看一会儿。',
+                            '和朋友聊天时，你更愿意讨论「AI 会不会有自我意识」这类没标准答案的话题。'
+                        ],
+                        gifts: '你容易找到学习之外的意义感，能从艺术、哲学、跨学科知识里获得深层满足。你不太容易被「标准答案」困住。',
+                        shadows: '有时你会因为想得太远、看得太杂，而分散了眼前的精力。期末周才发现，自己读了很多「有趣但考不到」的东西。',
+                        tip: '好奇心是你的燃料，但别忘了给期末考试留一张「必做清单」。'
+                    },
+                    中: {
+                        tagline: '你既愿意尝试新鲜事物，也会尊重自己的舒适区',
+                        definition: '你不会拒绝所有变化，但也不会为了变化而变化。对你来说，「有意思」和「实用」都很重要。',
+                        campus: [
+                            '你会尝试一门新选修课，但前提是它对你的专业或未来发展有帮助。',
+                            '看电影时，科幻片和喜剧片你都会看，选择取决于当天累不累。',
+                            '讨论有争议的话题时，你愿意听不同的观点，但不太会主动成为那个「挑事的人」。'
+                        ],
+                        gifts: '你能在稳定和创新之间找到平衡，既不会被变化吓到，也不会因为追求新鲜而忽略了基础。',
+                        shadows: '有时候你会在「想试试」和「算了太麻烦」之间犹豫太久，错失了一些本可以拓展自己的机会。',
+                        tip: '每个学期给自己一次「无理由尝试」：选一门完全陌生的课，或参加一个从没去过的社团活动。'
+                    },
+                    低: {
+                        tagline: '你更信任已经被验证过的东西',
+                        definition: '对你来说，未知意味着不确定，而确定感会让你安心。你偏爱具体、实用、可预期的经验，而不是抽象的可能性。',
+                        campus: [
+                            '你更喜欢有明确大纲和评分标准的课程，对「开放式课题」会感到压力。',
+                            '出去玩时，你倾向于去熟悉的地方、吃熟悉的菜。',
+                            '你更擅长把老师讲的例题吃透，而不是去探索课本外的延伸内容。'
+                        ],
+                        gifts: '你是团队里那个把想法落地的人。你注重细节、执行力强，别人天马行空时，你能看到现实的约束。',
+                        shadows: '过于依赖熟悉路径，可能让你在面对新学习系统、新教学方法时产生不必要的抵触。',
+                        tip: '稳定是你的优势，但偶尔允许自己「笨拙地尝试一次新事物」，你会发现未知没想象中可怕。'
+                    }
+                }
+            },
+            C: {
+                key: 'C',
+                name: '尽责性',
+                nameEn: 'Conscientiousness',
+                color: '#63B995',
+                icon: 'clipboard-list',
+                levels: {
+                    高: {
+                        tagline: '你内心住着一位「计划通」',
+                        definition: '对你来说，把事情提前安排好、按部就班地完成，本身就是一种安心。你不喜欢被截止日期追着跑，更享受那种「我早就搞定了」的掌控感。',
+                        campus: [
+                            '小组作业里，你常常是最早打开文档、列出分工表的人。',
+                            '你的书桌和电脑文件夹大概率有清晰的分类。',
+                            '你会在期中前就开始整理复习计划，而不是考前一周通宵。'
+                        ],
+                        gifts: '你是那种「说到做到」的人，老师、同学、朋友都容易信任你。你能把长期目标拆成每天可执行的小步骤。',
+                        shadows: '当计划被打乱时，你可能会特别焦虑。偶尔的放松或「浪费时间」会让你有负罪感。',
+                        tip: '计划是为了服务生活，而不是反过来。允许自己有一天什么都不做，这不会让你的优秀打折。'
+                    },
+                    中: {
+                        tagline: '你懂得规划，也懂得灵活',
+                        definition: '你不会把事情拖到最后一刻，但也不会把每一分钟都排满。对你来说，「完成」比「完美」重要，但「差不多」也会让你有点不舒服。',
+                        campus: [
+                            '你会提前一周开始写论文，但不会提前一个月。',
+                            '小组作业你会按时完成自己的部分，但可能不会主动当组长。',
+                            '桌面偶尔乱，但在交作业前一定会整理干净。'
+                        ],
+                        gifts: '你能在自律和自由之间找到舒适的节奏，既不会因为过度计划而窒息，也不会因为完全放纵而失控。',
+                        shadows: '有时候你会在「再玩一会儿」和「该学习了」之间反复横跳，消耗了不少心理能量。',
+                        tip: '把你真正重视的 1-2 件事写进日程表，其余事情允许弹性处理，你会更轻松。'
+                    },
+                    低: {
+                        tagline: '你更像一个「即兴派」',
+                        definition: '你不喜欢被条条框框束缚，更愿意跟随当下的感觉行动。对你来说，生活是一场探索，而不是一张待办清单。',
+                        campus: [
+                            '你常常在截止日期前才开始动笔，但往往在压力下爆发灵感。',
+                            '你的桌面或电脑文件可能「乱中有序」，只有你自己找得到。',
+                            '你很容易对新鲜事物产生兴趣，但坚持下来的不多。'
+                        ],
+                        gifts: '你灵活、应变能力强，能在混乱中找到别人看不到的捷径。你不容易被规则困住。',
+                        shadows: '拖延和遗漏可能会让你错过一些机会，也会给团队作业里的队友带来压力。',
+                        tip: '试试把大任务拆成「只花 10 分钟」的第一步，启动比计划更重要。'
+                    }
+                }
+            },
+            E: {
+                key: 'E',
+                name: '外向性',
+                nameEn: 'Extraversion',
+                color: '#F2A25C',
+                icon: 'zap',
+                levels: {
+                    高: {
+                        tagline: '你是一盏需要从人群中获取能量的灯',
+                        definition: '社交、表达、被关注，这些对别人可能是消耗，对你却是充电。你倾向于把想法说出来，而不是先在脑子里转很久。',
+                        campus: [
+                            '社团招新、班级聚会、小组讨论里，你常常是那个主动搭话、活跃气氛的人。',
+                            '你遇到问题时更愿意直接找人聊，而不是自己闷头想。',
+                            '周末如果一直独处，你可能会感到无聊或低落。'
+                        ],
+                        gifts: '你容易建立人脉、抓住机会，在需要表达和协作的场合很出彩。',
+                        shadows: '独处时你可能会感到不安，或者在还没想清楚时就说了太多。',
+                        tip: '热闹很好，但偶尔关掉手机独处一小时，你可能会听到自己真正的声音。'
+                    },
+                    中: {
+                        tagline: '你既需要人，也需要独处',
+                        definition: '你可以享受聚会，但一段时间后就想回家；你可以安静听讲，但有好想法时也愿意分享。你不是非黑即白的「社牛」或「社恐」。',
+                        campus: [
+                            '你会参加社团活动，但不会把所有晚上都排满。',
+                            '小组汇报时你能讲清楚，但更喜欢和熟悉的人搭档。',
+                            '疲惫时，你选择宅在宿舍恢复，而不是继续社交。'
+                        ],
+                        gifts: '你能根据情境切换模式，既不会社交透支，也不会完全封闭自己。',
+                        shadows: '有时你会纠结「去还是不去」，在犹豫中错过了一些本可以享受的时光。',
+                        tip: '不必强迫自己成为「永远的社交达人」或「彻底的独行者」，你的节奏就是对的节奏。'
+                    },
+                    低: {
+                        tagline: '你是一块需要安静来充电的电池',
+                        definition: '人群和噪音对你来说是消耗，而独处、阅读、深度对话才是你的能量来源。你并不讨厌人，只是更喜欢有质量的连接。',
+                        campus: [
+                            '新生见面会或社团聚餐后，你需要一个人待一会儿才能恢复。',
+                            '课堂上你更习惯先想清楚再发言，而不是抢着表达。',
+                            '你有一两个非常亲近的朋友，胜过一大堆泛泛之交。'
+                        ],
+                        gifts: '你善于深度思考、倾听和观察，常常能看到别人忽略的细节。',
+                        shadows: '在需要主动表现的场合，你可能会因为紧张或被忽视而错失机会。',
+                        tip: '内向不是缺陷。你可以不变成外向的人，只需要在必要时，给自己准备一句「我可以先说」的勇气。'
+                    }
+                }
+            },
+            A: {
+                key: 'A',
+                name: '宜人性',
+                nameEn: 'Agreeableness',
+                color: '#E87575',
+                icon: 'heart-handshake',
+                levels: {
+                    高: {
+                        tagline: '你天生容易感知到别人的情绪',
+                        definition: '你愿意为别人着想。对你来说，和谐的人际关系往往比「赢」更重要。你很容易原谅，也很容易把别人的需求放在自己前面。',
+                        campus: [
+                            '朋友深夜倾诉时，哪怕你自己也很累，也会耐心听完。',
+                            '小组作业出现分歧时，你倾向于让步或找折中方案，避免冲突。',
+                            '你很难直接拒绝别人的请求，哪怕自己已经很忙。'
+                        ],
+                        gifts: '你是身边人的「情绪避风港」，大家都愿意信任你、靠近你。',
+                        shadows: '过度迁就可能会让你压抑自己的真实想法，甚至被有心人利用。',
+                        tip: '善良很珍贵，但你的需求也同样重要。练习说「我可以帮你，但今晚不行」。'
+                    },
+                    中: {
+                        tagline: '你既懂得照顾别人，也懂得保护自己',
+                        definition: '你愿意帮忙，但不会因为帮忙而牺牲自己的底线。你相信合作，但也不害怕表达不同意见。',
+                        campus: [
+                            '小组作业里，你会倾听队友的想法，但如果你的方案明显更好，你也会据理力争。',
+                            '朋友遇到麻烦时你会安慰，但也会指出他的问题所在。',
+                            '你能在「对别人好」和「对自己公平」之间找到平衡。'
+                        ],
+                        gifts: '你既有同理心，又有边界感，是团队里难得的「理性温暖型」成员。',
+                        shadows: '有时你会在「要和谐」和「要坚持」之间拉扯，做决定比别人慢一些。',
+                        tip: '你的平衡感本身就是优势，不必要求自己永远让所有人满意。'
+                    },
+                    低: {
+                        tagline: '你更习惯用逻辑和效率看待事情',
+                        definition: '你直率、独立，对「人情世故」没有那么敏感。对你来说，正确和公平往往比「大家都开心」更重要。',
+                        campus: [
+                            '小组讨论时，你会直接指出方案的问题，哪怕气氛有点僵。',
+                            '朋友问你意见时，你倾向于说真话，而不是说好听的话。',
+                            '你对陌生人的善意会保持警惕，觉得「无功不受禄」。'
+                        ],
+                        gifts: '你是那个在混乱中看清本质的人，能做出冷静、理性的判断。',
+                        shadows: '过于直接的表达方式可能会让敏感的人受伤，影响你的人际关系。',
+                        tip: '真话可以包裹在温柔的语气里。你的逻辑很锋利，但不必每次都出鞘。'
+                    }
+                }
+            },
+            N: {
+                key: 'N',
+                name: '神经质',
+                nameEn: 'Neuroticism',
+                color: '#4A88D8',
+                icon: 'waves',
+                levels: {
+                    高: {
+                        tagline: '你的情绪雷达非常灵敏',
+                        definition: '你能感受到很细微的压力、不安和变化，这也意味着你体验世界的方式更强烈。你不是一个「想太多」的人，你只是感受得太丰富。',
+                        campus: [
+                            '考试前哪怕复习得很好，你也会担心「万一考砸了怎么办」。',
+                            '老师一句批评可能让你难过很久，反复回想自己哪里做错了。',
+                            '身体不舒服时，你会忍不住往最坏的情况想。'
+                        ],
+                        gifts: '你对风险敏感，能提前发现问题；你也更容易共情他人的痛苦。',
+                        shadows: '情绪起伏大容易消耗你的能量，让你陷入焦虑、自责或失眠。',
+                        tip: '你的敏感是一种天赋，但它需要休息。当大脑开始「灾难化想象」时，试着问自己：「最坏的结果真的会发生吗？我能承受吗？」'
+                    },
+                    中: {
+                        tagline: '你大多数时候情绪稳定，但压力来了也会波动',
+                        definition: '你不会被每件小事击垮，但遇到一些挫折时也会郁闷一阵子。你属于「正常人都会有的情绪起伏」。',
+                        campus: [
+                            '考试失利会让你难受，但一两天后基本能恢复。',
+                            '被批评时你会不开心，但能冷静下来分析对错。',
+                            '遇到突发状况会紧张，但通常能控制住场面。'
+                        ],
+                        gifts: '你既能感受到生活的重量，也不会被它压垮。你有适度的情绪反应。',
+                        shadows: '压力累积太多时，你可能会突然崩溃，而自己却没意识到已经撑了很久。',
+                        tip: '情绪不需要时刻稳定才正常。感到累的时候，允许自己暂停一下。'
+                    },
+                    低: {
+                        tagline: '你的情绪底盘很稳',
+                        definition: '遇到问题时，你倾向于先想「怎么解决」，而不是先陷入情绪风暴。你对挫折的恢复速度快，也不容易被外界评价牵着走。',
+                        campus: [
+                            '考试前你紧张感有限，更关注「还能复习什么」。',
+                            '被批评时，你会聚焦于问题本身，而不是反复自我怀疑。',
+                            '遇到倒霉事，你比较容易「翻篇」，不会让它长时间影响心情。'
+                        ],
+                        gifts: '你抗压能力强，能在混乱中保持清醒，是团队里的「稳定器」。',
+                        shadows: '有时你的冷静可能被误解为冷漠，或者在需要表达情绪时显得疏离。',
+                        tip: '稳定是你的超能力，但偶尔也让身边的人看到你的情绪，他们会更亲近你。'
+                    }
+                }
+            }
+        };
+
+        // 整体画像短语库（按 O/C/E/A/N 顺序组合）
+        const overallPortrait = {
+            O: {
+                高: '对世界有一种「还没看完」的好奇心',
+                中: '既愿意尝试新鲜事物，也尊重自己的舒适区',
+                低: '更信任已被验证过的、具体可预期的事物'
+            },
+            C: {
+                高: '内心住着一位「计划通」',
+                中: '懂得规划，也懂得灵活',
+                低: '更喜欢跟随当下感觉的「即兴派」'
+            },
+            E: {
+                高: '你是一盏需要从人群中获取能量的灯',
+                中: '你既需要人，也需要独处',
+                低: '你是一块需要安静来充电的电池'
+            },
+            A: {
+                高: '你天生容易感知到别人的情绪',
+                中: '你既懂得照顾别人，也懂得保护自己',
+                低: '你更习惯用逻辑和效率看待事情'
+            },
+            N: {
+                高: '情绪雷达非常灵敏',
+                中: '大多数时候情绪稳定，但压力来了也会波动',
+                低: '情绪底盘很稳'
+            }
+        };
+
+        // 类型名规则：根据主导维度组合生成
+        const archetypeRules = [
+            { test: r => r.O.level === '高' && r.E.level === '高', name: '热情探索者' },
+            { test: r => r.O.level === '高' && r.E.level === '低', name: '沉静思考者' },
+            { test: r => r.C.level === '高' && r.N.level === '低', name: '稳健执行者' },
+            { test: r => r.A.level === '高' && r.E.level === '高', name: '温暖连接者' },
+            { test: r => r.A.level === '高' && r.E.level === '低', name: '深度倾听者' },
+            { test: r => r.N.level === '低', name: '从容稳定者' },
+            { test: () => true, name: '平衡探索者' }
+        ];
+
+        // AI 建议内容
+        const aiSuggestions = [
+            {
+                icon: 'book-open',
+                title: '学习建议',
+                color: 'brand-primary',
+                bg: 'from-brand-primary/10 to-brand-primary/5',
+                content: '你的开放性较高，适合用「主题式学习」替代死记硬背。每学期选 1-2 个真正感兴趣的跨学科方向深入探索，同时用清单管理把好奇心锚定在考试范围内。'
+            },
+            {
+                icon: 'sprout',
+                title: '成长建议',
+                color: 'brand-auxiliary',
+                bg: 'from-brand-auxiliary/10 to-brand-auxiliary/5',
+                content: '你既有好奇心也有责任感，成长的关键在于「完成」而非「完美」。把大目标拆成每周可执行的小步骤，允许自己有探索和走弯路的余量。'
+            },
+            {
+                icon: 'users',
+                title: '人际建议',
+                color: 'brand-warm',
+                bg: 'from-brand-warm/10 to-brand-warm/5',
+                content: '你善于感知他人情绪，也容易在关系中让渡自己的需求。练习用「我可以帮你，但今晚不行」这样的句式设立边界，你的善良会更有力量。'
+            }
+        ];
+
+        // 聊天快捷操作
+        const chatQuickActions = [
+            { icon: 'graduation-cap', label: '职业建议', prompt: '我适合什么职业方向？' },
+            { icon: 'book-marked', label: '学习规划', prompt: '根据我的结果，怎么制定学习计划？' },
+            { icon: 'message-circle-heart', label: '人际关系', prompt: '我在人际关系中需要注意什么？' },
+            { icon: 'heart', label: '情绪支持', prompt: '为什么我容易焦虑，怎么调节？' }
+        ];
+
+        // 状态
+        let currentQuestion = 0;
+        let answers = {}; // { questionId: { choice: 'A'|'B'|'C'|'D'|'E', openText: string, score: number, scoring: boolean, reason: string } }
+        let radarChart = null;
+        let currentProfile = null; // 当前测评画像
+        let chatMessages = []; // { role: 'assistant'|'user', content: string }
+        let chatState = { isOpen: false };
+
+        // 后端 API 配置
+        const API_BASE_URL = "http://localhost:5000";
+        let backendAvailable = null; // null=未检测, true=可用, false=不可用
+
+        // 检测后端是否可用
+        async function checkBackend() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`, {
+                    method: "GET",
+                    signal: AbortSignal.timeout(3000),
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    backendAvailable = data.api_key_configured === true;
+                    console.log("后端状态:", data);
+                    return backendAvailable;
+                }
+            } catch (e) {
+                console.warn("后端检测失败:", e);
+            }
+            backendAvailable = false;
+            return false;
+        }
+
+        // 页面加载时检测后端
+        checkBackend();
+
+        function startAssessment() {
+            document.getElementById('welcome-page').classList.add('hidden');
+            document.getElementById('assessment-page').classList.remove('hidden');
+            currentQuestion = 0;
+            answers = {};
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            const container = document.getElementById('question-container');
+            const texts = optionTexts[q.id];
+
+            let html = `
+                <div class="question-number">第 ${q.id} 题</div>
+                <div class="question-text">【${q.scenario}】${q.text}</div>
+                <div class="options">
+            `;
+
+            ['A', 'B', 'C', 'D'].forEach((label, idx) => {
+                const selected = answers[q.id] && answers[q.id].choice === label ? 'selected' : '';
+                html += `
+                    <div class="option ${selected}" onclick="selectOption('${label}')" data-label="${label}">
+                        <span class="option-label">${label}</span>
+                        <span class="option-text">${texts[idx]}</span>
+                    </div>
+                `;
+            });
+
+            const eSelected = answers[q.id] && answers[q.id].choice === 'E' ? 'selected' : '';
+            html += `
+                <div class="option ${eSelected}" onclick="selectOption('E')" data-label="E">
+                    <span class="option-label">E</span>
+                    <span class="option-text">以上都不符合，我想自己说明</span>
+                </div>
+            `;
+
+            if (answers[q.id] && answers[q.id].choice === 'E') {
+                const ans = answers[q.id];
+
+                html += `
+                    <div class="open-text-area">
+                        <textarea id="open-text" placeholder="${q.prompt}" oninput="updateOpenText()">${answers[q.id].openText || ''}</textarea>
+                        <div id="open-text-actions">${getOpenTextActionsHtml(ans)}</div>
+                        <div id="open-text-feedback">${getOpenTextFeedbackHtml(ans)}</div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            container.innerHTML = html;
+
+            // 更新进度
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('current-num').textContent = currentQuestion + 1;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-percent').textContent = Math.round(progress) + '%';
+
+            // 更新按钮
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+
+            if (currentQuestion === questions.length - 1) {
+                document.getElementById('next-btn').textContent = '查看报告';
+            } else {
+                document.getElementById('next-btn').textContent = '下一题';
+            }
+
+            updateNextButton();
+        }
+
+        function selectOption(label) {
+            const q = questions[currentQuestion];
+            answers[q.id] = { choice: label, openText: '', score: 0, scoring: false, reason: '' };
+
+            if (label !== 'E') {
+                answers[q.id].score = options[label].score;
+                answers[q.id].openText = '';
+            }
+
+            renderQuestion();
+            updateNextButton();
+
+            // 如果选 E，自动触发评分
+            if (label === 'E') {
+                const textarea = document.getElementById('open-text');
+                if (textarea) {
+                    textarea.focus();
+                }
+            }
+        }
+
+        function updateOpenText() {
+            const q = questions[currentQuestion];
+            const textarea = document.getElementById('open-text');
+            if (textarea && answers[q.id]) {
+                const text = textarea.value;
+                answers[q.id].openText = text;
+
+                // 用户修改文本后，重置评分状态（需要重新点击"确定本题"评分）
+                if (answers[q.id].score > 0) {
+                    answers[q.id].score = 0;
+                    answers[q.id].reason = '';
+                    answers[q.id].isFallback = false;
+                    answers[q.id].errorMsg = '';
+                }
+
+                // 仅更新按钮与反馈区域，不重新渲染整个题目，避免 textarea 失焦
+                updateOpenTextUI();
+            }
+        }
+
+        // 根据当前开放文本状态生成"确定本题"按钮 HTML
+        function getOpenTextActionsHtml(ans) {
+            if (ans.openText && ans.openText.trim().length >= 3 && ans.score === 0 && !ans.scoring) {
+                return `
+                    <button class="btn btn-primary" style="margin-top: 12px;" onclick="confirmOpenTextScore()">
+                        确定本题，让 AI 评分
+                    </button>
+                `;
+            }
+            return '';
+        }
+
+        // 根据当前开放文本状态生成反馈 HTML（评分中 / 评分完成 / 错误信息）
+        function getOpenTextFeedbackHtml(ans) {
+            if (ans.errorMsg) {
+                return `<div style="margin-top: 12px; padding: 12px; background: #fff5f5; border-radius: 8px; color: #c53030; font-size: 14px;">${ans.errorMsg}</div>`;
+            }
+            if (ans.scoring) {
+                return `<div style="margin-top: 12px; padding: 12px; background: #f0f4ff; border-radius: 8px; color: #667eea; font-size: 14px;">AI 正在评分，请稍候……</div>`;
+            }
+            if (ans.score > 0 && ans.openText && ans.openText.trim().length >= 3) {
+                const scoreLabel = ans.isFallback ? '本地规则评分' : 'AI 评分完成';
+                return `<div style="margin-top: 12px; padding: 12px; background: #f0fff4; border-radius: 8px; color: #276749; font-size: 14px;">${scoreLabel}：${ans.score.toFixed(1)} 分。${ans.reason || ''}</div>`;
+            }
+            return '';
+        }
+
+        // 仅更新开放文本区域下方的按钮与反馈，保持 textarea 稳定不被重建
+        function updateOpenTextUI() {
+            const q = questions[currentQuestion];
+            const ans = answers[q.id];
+            if (!ans) return;
+
+            const actionsEl = document.getElementById('open-text-actions');
+            const feedbackEl = document.getElementById('open-text-feedback');
+            if (actionsEl) actionsEl.innerHTML = getOpenTextActionsHtml(ans);
+            if (feedbackEl) feedbackEl.innerHTML = getOpenTextFeedbackHtml(ans);
+
+            updateNextButton();
+        }
+
+        // 用户点击"确定本题"后，调用后端 AI 评分
+        function confirmOpenTextScore() {
+            const q = questions[currentQuestion];
+            const ans = answers[q.id];
+            if (!ans || !ans.openText || ans.openText.trim().length < 3) {
+                alert("请先输入补充说明（至少 3 个字）");
+                return;
+            }
+            scoreOpenTextWithBackend(q, ans.openText);
+        }
+
+        // 调用后端 LLM 评分
+        async function scoreOpenTextWithBackend(q, text) {
+            if (answers[q.id]) {
+                answers[q.id].scoring = true;
+                answers[q.id].errorMsg = '';
+                updateNextButton();
+            }
+
+            // 如果后端未检测或不可用，使用本地规则
+            if (backendAvailable === false) {
+                const localScore = scoreOpenTextLocal(text);
+                if (answers[q.id]) {
+                    answers[q.id].score = localScore;
+                    answers[q.id].reason = "本地规则评分（后端不可用）";
+                    answers[q.id].scoring = false;
+                    answers[q.id].isFallback = true;
+                }
+                updateOpenTextUI();
+                return;
+            }
+
+            // 如果还没检测完成后端，先检测
+            if (backendAvailable === null) {
+                await checkBackend();
+                if (backendAvailable === false) {
+                    scoreOpenTextWithBackend(q, text);
+                    return;
+                }
+            }
+
+            try {
+                const texts = optionTexts[q.id];
+                const response = await fetch(`${API_BASE_URL}/api/score`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        question_id: q.id,
+                        dimension: q.dimension,
+                        question_text: q.text,
+                        options: {
+                            A: texts[0],
+                            B: texts[1],
+                            C: texts[2],
+                            D: texts[3]
+                        },
+                        open_text: text
+                    })
+                });
+
+                const data = await response.json();
+
+                if (answers[q.id]) {
+                    if (data.error) {
+                        // 后端返回明确错误
+                        const errorText = data.error || '';
+                        if (errorText.includes('API Key') || errorText.includes('401') || errorText.includes('Unauthorized')) {
+                            answers[q.id].errorMsg = 'API Key 无效或已过期，请检查 backend/.env 中的 LLM_API_KEY';
+                        } else if (errorText.includes('余额') || errorText.includes('402') || errorText.includes('429')) {
+                            answers[q.id].errorMsg = 'API 账户余额不足或调用超限';
+                        } else {
+                            answers[q.id].errorMsg = `后端错误：${errorText}，已降级为本地规则`;
+                        }
+                        // 降级到本地规则
+                        answers[q.id].score = scoreOpenTextLocal(text);
+                        answers[q.id].reason = `后端评分失败：${errorText}`;
+                        answers[q.id].isFallback = true;
+                    } else if (data.fallback) {
+                        // 后端自己降级了
+                        answers[q.id].score = data.score;
+                        answers[q.id].reason = data.reason || "LLM 评分失败，已降级";
+                        answers[q.id].isFallback = true;
+                        answers[q.id].errorMsg = `${data.reason || '后端评分失败，已降级为本地规则'}`;
+                    } else {
+                        // 真正的 LLM 评分
+                        answers[q.id].score = data.score;
+                        answers[q.id].reason = data.reason || "LLM 评分";
+                        answers[q.id].isFallback = false;
+                        answers[q.id].errorMsg = '';
+                    }
+                    answers[q.id].scoring = false;
+                }
+            } catch (e) {
+                console.error("调用后端评分失败:", e);
+                backendAvailable = false;
+                if (answers[q.id]) {
+                    answers[q.id].score = scoreOpenTextLocal(text);
+                    answers[q.id].reason = "后端连接失败，已降级为本地规则评分";
+                    answers[q.id].scoring = false;
+                    answers[q.id].isFallback = true;
+                    answers[q.id].errorMsg = '无法连接后端，已降级为本地规则评分';
+                }
+            }
+
+            updateOpenTextUI();
+        }
+
+        function updateNextButton() {
+            const q = questions[currentQuestion];
+            const ans = answers[q.id];
+            const btn = document.getElementById('next-btn');
+
+            if (!ans) {
+                btn.disabled = true;
+                btn.textContent = currentQuestion === questions.length - 1 ? '查看报告' : '下一题';
+                return;
+            }
+
+            if (ans.choice === 'E') {
+                if (!ans.openText || ans.openText.trim() === '') {
+                    btn.disabled = true;
+                    btn.textContent = '请先输入补充说明';
+                    return;
+                }
+                if (ans.scoring) {
+                    btn.disabled = true;
+                    btn.textContent = 'AI 评分中...';
+                    return;
+                }
+                if (ans.score === 0) {
+                    btn.disabled = true;
+                    btn.textContent = '请先点击"确定本题，让 AI 评分"';
+                    return;
+                }
+            }
+
+            btn.textContent = currentQuestion === questions.length - 1 ? '查看报告' : '下一题';
+            btn.disabled = false;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        // 本地简化版开放文本评分（后端不可用时的降级方案）
+        function scoreOpenTextLocal(text) {
+            if (!text || text.trim().length < 3) return 2.5;
+
+            const intensifyWords = ["甚至", "超额", "必须", "立刻", "绝对", "极度享受", "完全无法忍受", "总是", "一定", "完全", "非常", "极其", "特别", "格外", "毫无疑问"];
+            const weakenWords = ["偶尔", "尽量", "看心情", "不得不", "有点", "虽然", "但是", "有时", "看情况", "一半一半", "可能", "大概", "勉强", "被迫", "不得已", "懒得", "不太想", "不情愿", "抗拒", "讨厌", "不喜欢"];
+            const mixedWords = ["有时候", "看情况", "一半一半", "视情况而定", "时好时坏", "不一定"];
+
+            let baseScore = 2.5;
+
+            // 简单规则：根据情感强度词数量调整
+            let intensifyCount = intensifyWords.reduce((count, word) => count + (text.includes(word) ? 1 : 0), 0);
+            let weakenCount = weakenWords.reduce((count, word) => count + (text.includes(word) ? 1 : 0), 0);
+            let mixedCount = mixedWords.reduce((count, word) => count + (text.includes(word) ? 1 : 0), 0);
+
+            if (intensifyCount > weakenCount && mixedCount === 0) {
+                baseScore = 3.5;
+            } else if (weakenCount > intensifyCount && mixedCount === 0) {
+                baseScore = 1.5;
+            } else if (mixedCount > 0 || (intensifyCount > 0 && weakenCount > 0)) {
+                baseScore = 2.5;
+            } else if (intensifyCount > 0) {
+                baseScore = 3.5;
+            } else if (weakenCount > 0) {
+                baseScore = 1.5;
+            }
+
+            // 长度惩罚/奖励：过于简短给中值
+            if (text.trim().length < 5) baseScore = Math.min(baseScore, 2.5);
+
+            return Math.max(1.0, Math.min(4.0, baseScore));
+        }
+
+        // =====================================================
+        // 报告页：工具函数
+        // =====================================================
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getLevelClass(level) {
+            return level === '高' ? 'level-high' : (level === '中' ? 'level-mid' : 'level-low');
+        }
+
+        function getLevelColor(level) {
+            return level === '高' ? '#63B995' : (level === '中' ? '#F2A25C' : '#E87575');
+        }
+
+        function computeArchetype(results) {
+            const rule = archetypeRules.find(r => r.test(results));
+            return rule ? rule.name : '平衡探索者';
+        }
+
+        function generateOverallPortrait(results) {
+            const dims = ['O', 'C', 'E', 'A', 'N'];
+            const phrases = dims.map(d => overallPortrait[d][results[d].level]);
+            return `你像是一个${phrases[0]}的人。${phrases[2]}；${phrases[3]}。同时你${phrases[1]}，而${phrases[4]}。`;
+        }
+
+        function computeTotalScore(results) {
+            return Object.values(results).reduce((sum, r) => sum + r.total, 0).toFixed(1);
+        }
+
+        function getKeywords(results) {
+            const map = {
+                O: { 高: '探索欲', 中: '务实', 低: '稳健' },
+                C: { 高: '责任感', 中: '灵活', 低: '随性' },
+                E: { 高: '外向', 中: '平衡', 低: '内省' },
+                A: { 高: '共情', 中: '独立', 低: '理性' },
+                N: { 高: '敏感', 中: '真实', 低: '稳定' }
+            };
+            const keywords = [];
+            ['O', 'C', 'E', 'A', 'N'].forEach(d => {
+                keywords.push(map[d][results[d].level]);
+            });
+            return [...new Set(keywords)];
+        }
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // =====================================================
+        // 报告页：渲染函数
+        // =====================================================
+
+        function renderHero() {
+            const archetype = computeArchetype(appState.results);
+            const portrait = generateOverallPortrait(appState.results);
+            const totalScore = computeTotalScore(appState.results);
+
+            document.getElementById('hero-archetype').textContent = archetype;
+            document.getElementById('hero-summary').textContent = portrait;
+            document.getElementById('hero-score').textContent = totalScore;
+        }
+
+        function renderOverview() {
+            const archetype = computeArchetype(appState.results);
+            const portrait = generateOverallPortrait(appState.results);
+            const keywords = getKeywords(appState.results);
+            const totalScore = computeTotalScore(appState.results);
+
+            document.getElementById('overview-archetype').textContent = archetype;
+            document.getElementById('overview-summary').textContent = portrait;
+            document.getElementById('overview-score').textContent = totalScore;
+
+            const keywordColors = ['bg-brand-primary/10 text-brand-primary', 'bg-brand-auxiliary/10 text-brand-auxiliary', 'bg-brand-warm/10 text-brand-warm', 'bg-brand-coral/10 text-brand-coral', 'bg-brand-primary/10 text-brand-primary'];
+            const container = document.getElementById('overview-keywords');
+            container.innerHTML = keywords.map((kw, i) => `
+                <span class="tag-pill ${keywordColors[i % keywordColors.length]}">${escapeHtml(kw)}</span>
+            `).join('');
+        }
+
+        function initRadarChart() {
+            const ctx = document.getElementById('radar-chart').getContext('2d');
+            const labels = ['开放性', '尽责性', '外向性', '宜人性', '神经质'];
+            const data = ['O', 'C', 'E', 'A', 'N'].map(d => appState.results[d].total);
+            const pointColors = data.map((_, i) => i === appState.activeDimensionIndex ? '#4A88D8' : 'rgba(74, 136, 216, 0.5)');
+            const pointRadii = data.map((_, i) => i === appState.activeDimensionIndex ? 8 : 4);
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '你的得分',
+                        data: data,
+                        backgroundColor: 'rgba(74, 136, 216, 0.18)',
+                        borderColor: '#4A88D8',
+                        borderWidth: 2,
+                        pointBackgroundColor: pointColors,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: pointRadii,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            min: 5,
+                            max: 20,
+                            ticks: {
+                                stepSize: 5,
+                                backdropColor: 'transparent',
+                                color: '#9CA3AF',
+                                font: { size: 11 }
+                            },
+                            grid: {
+                                color: 'rgba(74, 136, 216, 0.08)'
+                            },
+                            angleLines: {
+                                color: 'rgba(74, 136, 216, 0.1)'
+                            },
+                            pointLabels: {
+                                font: { size: 13, weight: '500' },
+                                color: (ctx) => {
+                                    return ctx.index === appState.activeDimensionIndex ? '#4A88D8' : '#6B7280';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateRadarHighlight() {
+            if (!radarChart) return;
+            const count = 5;
+            const newPointColors = Array.from({ length: count }, (_, i) =>
+                i === appState.activeDimensionIndex ? '#4A88D8' : 'rgba(74, 136, 216, 0.35)'
+            );
+            const newPointRadii = Array.from({ length: count }, (_, i) =>
+                i === appState.activeDimensionIndex ? 8 : 4
+            );
+            radarChart.data.datasets[0].pointBackgroundColor = newPointColors;
+            radarChart.data.datasets[0].pointRadius = newPointRadii;
+            radarChart.update();
+        }
+
+        function renderDimensionCarousel() {
+            const track = document.getElementById('dimension-carousel');
+            const dots = document.getElementById('dim-dots');
+            const dims = ['O', 'C', 'E', 'A', 'N'];
+
+            track.innerHTML = dims.map((d, i) => {
+                const dim = dimensionData[d];
+                const result = appState.results[d];
+                const profile = dim.levels[result.level];
+                const levelClass = getLevelClass(result.level);
+
+                return `
+                    <div class="carousel-slide ${i === appState.activeDimensionIndex ? 'active' : ''}" data-index="${i}">
+                        <div class="glass rounded-3xl p-6 md:p-10 mx-1">
+                            <!-- 头部 -->
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background: ${dim.color}15;">
+                                        <i data-lucide="${dim.icon}" class="w-6 h-6" style="color: ${dim.color};"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-gray-800">${dim.name} <span class="text-base font-normal text-gray-400">${dim.nameEn}</span></h3>
+                                        <p class="text-sm text-gray-500">维度 ${i + 1} / 5</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="level-badge ${levelClass}">${result.level}</span>
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold" style="color: ${dim.color};">${result.total.toFixed(1)}</p>
+                                        <p class="text-xs text-gray-400">总分 / 20</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tagline -->
+                            <div class="mb-8">
+                                <p class="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">${escapeHtml(profile.tagline)}</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- 左列 -->
+                                <div class="space-y-6">
+                                    <div class="bg-white/60 rounded-2xl p-5">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                                            <i data-lucide="info" class="w-4 h-4 text-brand-primary"></i>
+                                            这个维度在说什么
+                                        </h4>
+                                        <p class="text-gray-600 leading-relaxed text-sm">${escapeHtml(profile.definition)}</p>
+                                    </div>
+
+                                    <div class="bg-white/60 rounded-2xl p-5">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                                            <i data-lucide="school" class="w-4 h-4 text-brand-primary"></i>
+                                            在大学生活里
+                                        </h4>
+                                        <ul class="space-y-2">
+                                            ${profile.campus.map(item => `
+                                                <li class="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
+                                                    <span class="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style="background: ${dim.color};"></span>
+                                                    ${escapeHtml(item)}
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- 右列 -->
+                                <div class="space-y-6">
+                                    <div class="rounded-2xl p-5 bg-brand-auxiliary/10">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-brand-auxiliary mb-2">
+                                            <i data-lucide="gift" class="w-4 h-4"></i>
+                                            礼物
+                                        </h4>
+                                        <p class="text-sm text-gray-700 leading-relaxed">${escapeHtml(profile.gifts)}</p>
+                                    </div>
+
+                                    <div class="rounded-2xl p-5 bg-brand-warm/10">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-brand-warm mb-2">
+                                            <i data-lucide="cloud-moon" class="w-4 h-4"></i>
+                                            阴影
+                                        </h4>
+                                        <p class="text-sm text-gray-700 leading-relaxed">${escapeHtml(profile.shadows)}</p>
+                                    </div>
+
+                                    <div class="rounded-2xl p-5 border border-brand-primary/20 bg-brand-primary/5">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-brand-primary mb-2">
+                                            <i data-lucide="lightbulb" class="w-4 h-4"></i>
+                                            一个小提醒
+                                        </h4>
+                                        <p class="text-sm text-gray-700 leading-relaxed italic">${escapeHtml(profile.tip)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 圆点
+            dots.innerHTML = dims.map((_, i) => `
+                <button class="w-2.5 h-2.5 rounded-full transition-all ${i === appState.activeDimensionIndex ? 'bg-brand-primary w-6' : 'bg-gray-300 hover:bg-gray-400'}" data-index="${i}" aria-label="切换到第 ${i + 1} 个维度"></button>
+            `).join('');
+
+            // 重新初始化该区域的 lucide 图标
+            lucide.createIcons({ nodes: track.querySelectorAll('[data-lucide]') });
+            lucide.createIcons({ nodes: dots });
+
+            // 更新 transform
+            updateCarouselTransform();
+        }
+
+        function updateCarouselTransform() {
+            const track = document.getElementById('dimension-carousel');
+            track.style.transform = `translateX(-${appState.activeDimensionIndex * 100}%)`;
+
+            // 更新 active class
+            const slides = track.querySelectorAll('.carousel-slide');
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === appState.activeDimensionIndex);
+            });
+
+            // 更新圆点
+            const dotButtons = document.getElementById('dim-dots').querySelectorAll('button');
+            dotButtons.forEach((btn, i) => {
+                if (i === appState.activeDimensionIndex) {
+                    btn.className = 'w-2.5 h-2.5 rounded-full transition-all bg-brand-primary w-6';
+                } else {
+                    btn.className = 'w-2.5 h-2.5 rounded-full transition-all bg-gray-300 hover:bg-gray-400';
+                }
+            });
+        }
+
+        function goToDimension(index) {
+            const count = 5;
+            appState.activeDimensionIndex = Math.max(0, Math.min(count - 1, index));
+            updateCarouselTransform();
+            updateRadarHighlight();
+        }
+
+        function nextDimension() {
+            goToDimension(appState.activeDimensionIndex + 1);
+        }
+
+        function prevDimension() {
+            goToDimension(appState.activeDimensionIndex - 1);
+        }
+
+        function renderAISuggestions() {
+            const container = document.getElementById('ai-suggestions');
+            container.innerHTML = aiSuggestions.map(item => `
+                <div class="reveal glass rounded-3xl p-7 card-float">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${item.bg} flex items-center justify-center mb-5">
+                        <i data-lucide="${item.icon}" class="w-6 h-6 text-${item.color}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">${escapeHtml(item.title)}</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm">${escapeHtml(item.content)}</p>
+                </div>
+            `).join('');
+
+            // 让 stagger 动画生效
+            container.querySelectorAll('.reveal').forEach((el, i) => {
+                el.classList.add(`reveal-delay-${Math.min(i + 1, 4)}`);
+            });
+
+            // 初始化图标
+            lucide.createIcons({ nodes: container.querySelectorAll('[data-lucide]') });
+        }
+
+        function renderOpenTextSummary() {
+            const text = appState.openText.note;
+            document.getElementById('open-text-content').textContent = text;
+        }
+
+        function renderChatAgent() {
+            const quickActions = document.getElementById('chat-quick-actions');
+            quickActions.innerHTML = chatQuickActions.map(action => `
+                <button onclick="handleQuickAction('${action.label}', '${action.prompt}')" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/70 hover:bg-white border border-gray-100 text-xs text-gray-600 hover:text-brand-primary transition-colors text-left">
+                    <i data-lucide="${action.icon}" class="w-3.5 h-3.5"></i>
+                    ${escapeHtml(action.label)}
+                </button>
+            `).join('');
+            lucide.createIcons({ nodes: quickActions });
+        }
+
+        // =====================================================
+        // 报告页：聊天交互
+        // =====================================================
+
+        function toggleChat(open) {
+            chatState.isOpen = open;
+            const win = document.getElementById('chat-window');
+            const btn = document.getElementById('chat-toggle');
+            if (open) {
+                win.classList.add('open');
+                btn.classList.add('hidden');
+                document.getElementById('chat-input').focus();
+            } else {
+                win.classList.remove('open');
+                btn.classList.remove('hidden');
+            }
+        }
+
+        function appendMessage(role, content) {
+            const container = document.getElementById('chat-messages');
+            const isUser = role === 'user';
+            const html = `
+                <div class="flex gap-3 ${isUser ? 'flex-row-reverse' : ''}">
+                    ${isUser ? '' : `
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                        </div>
+                    `}
+                    <div class="${isUser ? 'bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-tr-sm' : 'bg-brand-primary/10 text-gray-700 rounded-2xl rounded-tl-sm'} px-4 py-3 max-w-[85%] text-sm leading-relaxed shadow-sm">
+                        ${escapeHtml(content)}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            if (!isUser) lucide.createIcons({ nodes: container.lastElementChild });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function handleQuickAction(label, prompt) {
+            chatMessages.push({ role: 'user', content: prompt });
+            appendMessage('user', prompt);
+            await sendChatToBackend();
+        }
+
+        async function sendChatToBackend() {
+            const sendBtn = document.getElementById('chat-send');
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: chatMessages,
+                        profile: currentProfile
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    const errorReply = `抱歉，Agent 调用失败：${data.error}。你可以稍后重试，或联系真人专业人士。`;
+                    chatMessages.push({ role: 'assistant', content: errorReply });
+                    appendMessage('assistant', errorReply);
+                } else {
+                    chatMessages.push({ role: 'assistant', content: data.reply });
+                    appendMessage('assistant', data.reply);
+                }
+            } catch (e) {
+                console.error('调用 Agent 失败:', e);
+                const errorReply = '抱歉，网络连接失败，无法获取 Agent 回复。请检查后端是否已启动。';
+                chatMessages.push({ role: 'assistant', content: errorReply });
+                appendMessage('assistant', errorReply);
+            }
+
+            sendBtn.disabled = false;
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            if (!currentProfile) {
+                alert('画像数据不存在，请重新测评。');
+                return;
+            }
+
+            chatMessages.push({ role: 'user', content: text });
+            appendMessage('user', text);
+            input.value = '';
+
+            sendChatToBackend();
+        }
+
+        // =====================================================
+        // 报告页：动画与交互初始化
+        // =====================================================
+
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.12,
+                rootMargin: '0px 0px -40px 0px'
+            });
+
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        }
+
+        function initSwipe() {
+            const track = document.getElementById('dimension-carousel');
+            let startX = 0;
+            let isDragging = false;
+
+            track.addEventListener('touchstart', e => {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+            }, { passive: true });
+
+            track.addEventListener('touchend', e => {
+                if (!isDragging) return;
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) nextDimension();
+                    else prevDimension();
+                }
+                isDragging = false;
+            }, { passive: true });
+        }
+
+        // =====================================================
+        // 测评结果处理
+        // =====================================================
+
+        function showResult() {
+            // 计算维度分数
+            const dimScores = { O: [], C: [], E: [], A: [], N: [] };
+            const dimEvidence = { O: [], C: [], E: [], A: [], N: [] };
+            let openTextCount = 0;
+            const openTextDims = new Set();
+
+            questions.forEach(q => {
+                const ans = answers[q.id];
+                if (!ans) return;
+
+                dimScores[q.dimension].push(ans.score);
+
+                if (ans.choice === 'E') {
+                    openTextCount++;
+                    openTextDims.add(q.dimension);
+                    dimEvidence[q.dimension].push(`Q${q.id}: 开放文本"${ans.openText.substring(0, 30)}..."→${ans.score}分`);
+                } else {
+                    dimEvidence[q.dimension].push(`Q${q.id}: 选择${ans.choice}→${ans.score}分`);
+                }
+            });
+
+            const results = {};
+
+            ['O', 'C', 'E', 'A', 'N'].forEach(d => {
+                const scores = dimScores[d];
+                const total = scores.reduce((a, b) => a + b, 0);
+                const avg = scores.length > 0 ? total / scores.length : 2.5;
+                const level = avg >= 3.0 ? '高' : (avg >= 2.0 ? '中' : '低');
+
+                results[d] = {
+                    total: total,
+                    avg: avg,
+                    level: level,
+                    evidence: dimEvidence[d].slice(0, 3)
+                };
+            });
+
+            // 保存当前画像（用于聊天 Agent）
+            currentProfile = {};
+            ['O', 'C', 'E', 'A', 'N'].forEach(d => {
+                currentProfile[d] = {
+                    total: parseFloat(results[d].total.toFixed(2)),
+                    avg: parseFloat(results[d].avg.toFixed(2)),
+                    level: results[d].level
+                };
+            });
+
+            // 同步到 appState
+            appState.results = results;
+            appState.activeDimensionIndex = 0;
+
+            const dimsText = Array.from(openTextDims).map(d => dimensionData[d].name).join('、');
+            if (openTextCount > 0) {
+                appState.openText = {
+                    count: openTextCount,
+                    dimensions: Array.from(openTextDims),
+                    note: `本次测评中，你有 ${openTextCount} 道题使用了开放说明，主要分布在${dimsText}维度。这些补充说明已按评分标准纳入对应维度总分。若后端不可用，系统会自动降级为本地规则评分，结果仅供参考。`
+                };
+            } else {
+                appState.openText = {
+                    count: 0,
+                    dimensions: [],
+                    note: '本次测评中，你没有使用开放说明，全部使用选项作答。'
+                };
+            }
+
+            // 初始化聊天消息
+            chatMessages = [{
+                role: 'assistant',
+                content: '你好，我已经阅读了你的测评结果。你可以问我关于职业方向、学习风格、人际策略或情绪调节的问题，我会基于你的画像给出参考建议。'
+            }];
+
+            // 切换到报告页
+            document.getElementById('assessment-page').classList.add('hidden');
+            document.body.classList.add('report-mode');
+            const resultPage = document.getElementById('result-page');
+            resultPage.classList.remove('hidden');
+
+            // 显示 AI 聊天按钮
+            document.getElementById('chat-toggle').classList.remove('hidden');
+
+            // 生成画像数据（供复制）
+            generateProfileData(results);
+
+            // 渲染所有报告区块
+            renderHero();
+            renderOverview();
+            initRadarChart();
+            renderDimensionCarousel();
+            renderAISuggestions();
+            renderOpenTextSummary();
+            renderChatAgent();
+
+            // 初始化图标
+            lucide.createIcons();
+
+            // 动画与交互
+            initScrollReveal();
+            initSwipe();
+
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function generateProfileData(results) {
+            const profile = {
+                测评时间: new Date().toLocaleString('zh-CN'),
+                整体画像: generateOverallPortrait(results),
+                各维度分数: {
+                    开放性: { 总分: results.O.total.toFixed(2), 均分: results.O.avg.toFixed(2), 等级: results.O.level },
+                    尽责性: { 总分: results.C.total.toFixed(2), 均分: results.C.avg.toFixed(2), 等级: results.C.level },
+                    外向性: { 总分: results.E.total.toFixed(2), 均分: results.E.avg.toFixed(2), 等级: results.E.level },
+                    宜人性: { 总分: results.A.total.toFixed(2), 均分: results.A.avg.toFixed(2), 等级: results.A.level },
+                    神经质: { 总分: results.N.total.toFixed(2), 均分: results.N.avg.toFixed(2), 等级: results.N.level }
+                },
+                开放文本使用情况: Object.values(answers).filter(a => a.choice === 'E').length > 0 ? '有' : '无'
+            };
+
+            // 创建或更新隐藏的画像数据容器
+            let profileDataEl = document.getElementById('profile-data');
+            if (!profileDataEl) {
+                profileDataEl = document.createElement('pre');
+                profileDataEl.id = 'profile-data';
+                profileDataEl.style.display = 'none';
+                document.body.appendChild(profileDataEl);
+            }
+            profileDataEl.textContent = JSON.stringify(profile, null, 2);
+        }
+
+        function copyProfileData() {
+            const data = document.getElementById('profile-data').textContent;
+            navigator.clipboard.writeText(data).then(() => {
+                alert('画像数据已复制，可以粘贴到画像答疑 Agent 中继续提问。');
+            }).catch(err => {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动复制。');
+            });
+        }
+
+        function restartAssessment() {
+            document.body.classList.remove('report-mode');
+            document.getElementById('result-page').classList.add('hidden');
+            document.getElementById('chat-toggle').classList.add('hidden');
+            document.getElementById('welcome-page').classList.remove('hidden');
+
+            currentQuestion = 0;
+            answers = {};
+            currentProfile = null;
+            chatMessages = [];
+
+            if (radarChart) {
+                radarChart.destroy();
+                radarChart = null;
+            }
+
+            if (chatState.isOpen) {
+                toggleChat(false);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =====================================================
+        // 页面加载完成后绑定报告页事件
+        // =====================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 轮播事件
+            const prevDimBtn = document.getElementById('prev-dim');
+            const nextDimBtn = document.getElementById('next-dim');
+            const dimDots = document.getElementById('dim-dots');
+
+            if (prevDimBtn) prevDimBtn.addEventListener('click', prevDimension);
+            if (nextDimBtn) nextDimBtn.addEventListener('click', nextDimension);
+            if (dimDots) {
+                dimDots.addEventListener('click', e => {
+                    const btn = e.target.closest('button');
+                    if (btn) goToDimension(parseInt(btn.dataset.index, 10));
+                });
+            }
+
+            // 聊天事件
+            const chatToggle = document.getElementById('chat-toggle');
+            const chatClose = document.getElementById('chat-close');
+            const chatSend = document.getElementById('chat-send');
+
+            if (chatToggle) chatToggle.addEventListener('click', () => toggleChat(true));
+            if (chatClose) chatClose.addEventListener('click', () => toggleChat(false));
+            if (chatSend) chatSend.addEventListener('click', sendChatMessage);
+
+            // 点击外部关闭聊天
+            document.addEventListener('click', e => {
+                const win = document.getElementById('chat-window');
+                const btn = document.getElementById('chat-toggle');
+                if (chatState.isOpen && !win.contains(e.target) && !btn.contains(e.target)) {
+                    toggleChat(false);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
