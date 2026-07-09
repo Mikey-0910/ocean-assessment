@@ -400,25 +400,178 @@
             transform: scale(1);
         }
 
-        /* ===== 聊天窗口动画 ===== */
-        .chat-window {
+        /* ===== 聊天窗口（居中模态） ===== */
+        .ai-modal-overlay {
             position: fixed;
-            bottom: 90px;
-            right: 24px;
-            width: 380px;
-            max-height: 640px;
-            border-radius: 24px;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             opacity: 0;
-            transform: scale(0.92) translateY(20px);
-            transform-origin: bottom right;
             pointer-events: none;
-            transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-            z-index: 50;
+            transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .chat-window.open {
+        .ai-modal-overlay.open {
             opacity: 1;
-            transform: scale(1) translateY(0);
             pointer-events: auto;
+        }
+        .ai-modal {
+            width: 520px;
+            max-width: calc(100vw - 32px);
+            height: 700px;
+            max-height: calc(100vh - 64px);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.94) translateY(24px);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .ai-modal-overlay.open .ai-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        /* ===== AI 人格分析师专区卡片 ===== */
+        .ai-agent-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+        }
+        .ai-agent-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 56px rgba(74, 136, 216, 0.16);
+        }
+        .ai-agent-glow {
+            position: absolute;
+            top: -80px;
+            right: -60px;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(74, 136, 216, 0.12), transparent 70%);
+            pointer-events: none;
+        }
+        .ai-agent-avatar-ring {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            padding: 3px;
+            background: linear-gradient(135deg, #4A88D8, #63B995, #F2A25C);
+        }
+        .ai-agent-avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4A88D8, #63B995);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ai-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, #4A88D8 0%, #5B9EE8 50%, #63B995 100%);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background-position 0.6s ease;
+            box-shadow: 0 8px 32px rgba(74, 136, 216, 0.32);
+            animation: aiCtaPulse 3s ease-in-out infinite;
+        }
+        .ai-cta-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 16px 44px rgba(74, 136, 216, 0.44);
+            background-position: 100% 0;
+        }
+        .ai-cta-btn:active {
+            transform: scale(0.97);
+        }
+        @keyframes aiCtaPulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(74, 136, 216, 0.32); }
+            50% { box-shadow: 0 12px 40px rgba(74, 136, 216, 0.5); }
+        }
+
+        /* ===== 建议问题按钮 ===== */
+        .suggested-q-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(74, 136, 216, 0.15);
+            border-radius: 14px;
+            font-size: 13px;
+            color: #4B5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-family: inherit;
+        }
+        .suggested-q-btn:hover {
+            background: rgba(74, 136, 216, 0.06);
+            border-color: rgba(74, 136, 216, 0.35);
+            color: #4A88D8;
+            transform: translateY(-1px);
+        }
+
+        /* ===== 聊天消息区 ===== */
+        .chat-message-bot {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .chat-bubble-bot {
+            background: #F0F4FF;
+            border-radius: 18px 18px 18px 4px;
+            padding: 12px 16px;
+            max-width: 85%;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
+        }
+        .chat-bubble-user {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 18px 18px 4px 18px;
+            padding: 12px 16px;
+            max-width: 85%;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        /* 响应式：小屏时聊天模态全屏 */
+        @media (max-width: 640px) {
+            .ai-modal-overlay {
+                align-items: stretch;
+            }
+            .ai-modal {
+                width: 100%;
+                max-width: 100%;
+                height: 100%;
+                max-height: 100%;
+                border-radius: 0;
+            }
+            .ai-modal-overlay.open .ai-modal {
+                transform: scale(1) translateY(0);
+            }
+            .blob {
+                opacity: 0.3;
+            }
+            .ai-cta-btn {
+                padding: 14px 28px;
+                font-size: 16px;
+            }
         }
 
         /* ===== 标签徽章 ===== */
@@ -461,19 +614,7 @@
             border-radius: 3px;
         }
 
-        /* ===== 响应式：手机聊天窗口 ===== */
-        @media (max-width: 640px) {
-            .chat-window {
-                width: calc(100% - 32px);
-                right: 16px;
-                bottom: 80px;
-                border-radius: 20px;
-                transform-origin: bottom center;
-            }
-            .blob {
-                opacity: 0.3;
-            }
-        }
+        /* ===== 响应式：移动端 ===== */
 
         /* ===== 折叠卡 ===== */
         details > summary {
@@ -504,9 +645,8 @@
                 padding: 0 !important;
             }
             .blob,
-            #chat-toggle,
-            #chat-window,
-            .report-action-bar .btn-bounce {
+            .ai-modal-overlay,
+            #ai-agent-section .ai-cta-btn {
                 display: none !important;
             }
             #result-page section {
@@ -750,6 +890,57 @@
                 </div>
             </section>
 
+            <!-- ==================== AI 人格分析师（核心专区） ==================== -->
+            <section id="ai-agent-section" class="py-20 px-6">
+                <div class="max-w-4xl mx-auto">
+                    <div class="reveal ai-agent-card glass-strong rounded-3xl p-8 md:p-10">
+                        <!-- 背景光斑 -->
+                        <div class="ai-agent-glow"></div>
+
+                        <div class="relative z-10">
+                            <!-- 头部 -->
+                            <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8 text-center md:text-left">
+                                <div class="ai-agent-avatar-ring flex-shrink-0">
+                                    <div class="ai-agent-avatar-inner">
+                                        <i data-lucide="sparkles" class="w-7 h-7 text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
+                                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">AI 人格分析师</h2>
+                                        <div class="flex items-center gap-1.5 justify-center md:justify-start">
+                                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                            <span class="text-xs text-green-600 font-medium">在线</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mt-1">已加载你的专属人格画像</p>
+                                    <p class="text-gray-500 leading-relaxed mt-3 max-w-lg">
+                                        还想更了解自己？AI 已经阅读了你的测评结果，随时准备与你一起探索。你可以问它职业方向、学习风格、人际关系，或任何关于你人格画像的问题。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- CTA 按钮 -->
+                            <div class="flex justify-center md:justify-start mb-10">
+                                <button id="ai-agent-cta" class="ai-cta-btn" onclick="openAiChat()">
+                                    <i data-lucide="message-circle-heart" class="w-5 h-5"></i>
+                                    立即开始对话
+                                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <!-- 建议问题 -->
+                            <div class="border-t border-gray-100 pt-6">
+                                <p class="text-sm text-gray-400 mb-4 text-center md:text-left">或者从一个话题开始：</p>
+                                <div id="ai-suggested-questions" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <!-- 由 JS 生成 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- ==================== AI 建议 ==================== -->
             <section id="suggestions" class="py-24 px-6">
                 <div class="max-w-6xl mx-auto">
@@ -797,58 +988,60 @@
         </main>
     </div>
 
-    <!-- ==================== AI 人格 Agent ==================== -->
-    <!-- 悬浮按钮 -->
-    <button id="chat-toggle" class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lift flex items-center justify-center z-50 btn-bounce hidden" aria-label="打开人格成长助手">
-        <i data-lucide="message-circle" class="w-6 h-6"></i>
-    </button>
-
-    <!-- 聊天窗口 -->
-    <div id="chat-window" class="chat-window glass-strong shadow-lift flex flex-col overflow-hidden" role="dialog" aria-label="人格成长助手">
-        <!-- 头部 -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center">
-                    <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+    <!-- ==================== AI 聊天模态 ==================== -->
+    <!-- 遮罩层 + 模态窗口 -->
+    <div id="ai-modal-overlay" class="ai-modal-overlay" role="dialog" aria-label="AI 人格分析师对话">
+        <div class="ai-modal glass-strong shadow-lift flex flex-col">
+            <!-- 头部 -->
+            <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white/50">
+                <div class="flex items-center gap-3">
+                    <div class="ai-agent-avatar-ring" style="width:44px;height:44px;">
+                        <div class="ai-agent-avatar-inner">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">AI 人格分析师</p>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span class="text-xs text-gray-500">在线 · 已加载你的专属人格画像</span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <p class="font-semibold text-gray-800">人格成长助手</p>
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span class="text-xs text-gray-500">在线</span>
+                <button id="ai-modal-close" class="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors" aria-label="关闭">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- 消息区 -->
+            <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 custom-scroll">
+                <!-- 欢迎语 -->
+                <div class="chat-message-bot">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div class="chat-bubble-bot">
+                        <p>你好呀 👋 我已经读完你的测评报告了。你可以问我关于职业方向、学习风格、人际关系，或者对某个维度分数感到好奇——我会结合你的画像，给你一些参考建议。</p>
+                    </div>
+                </div>
+
+                <!-- 快捷问题 -->
+                <div class="pl-11">
+                    <p class="text-xs text-gray-400 mb-2">你可以试试这样问：</p>
+                    <div id="ai-chat-quick-actions" class="grid grid-cols-1 gap-2">
+                        <!-- 由 JS 生成 -->
                     </div>
                 </div>
             </div>
-            <button id="chat-close" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors" aria-label="关闭">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
 
-        <!-- 消息区 -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 custom-scroll">
-            <!-- 欢迎语 -->
-            <div class="flex gap-3">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+            <!-- 输入区 -->
+            <div class="p-4 border-t border-gray-100 bg-white/50">
+                <div class="flex items-center gap-2">
+                    <input id="ai-chat-input" type="text" placeholder="输入你的问题..." class="flex-1 px-5 py-3 rounded-full border border-gray-200 bg-white text-sm input-glow transition-all" onkeypress="if(event.key==='Enter') sendAiChatMessage()">
+                    <button id="ai-chat-send" class="w-11 h-11 rounded-full bg-brand-primary text-white flex items-center justify-center hover:bg-brand-primary-dark transition-colors flex-shrink-0 btn-bounce">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
                 </div>
-                <div class="bg-brand-primary/10 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
-                    <p class="text-sm text-gray-700 leading-relaxed">你好，我已经阅读了你的测评结果。你可以问我关于职业方向、学习风格、人际策略或情绪调节的问题，我会基于你的画像给出参考建议。</p>
-                </div>
-            </div>
-
-            <!-- 快捷按钮 -->
-            <div id="chat-quick-actions" class="grid grid-cols-2 gap-2 pl-11">
-                <!-- 由 JS 生成 -->
-            </div>
-        </div>
-
-        <!-- 输入区 -->
-        <div class="p-4 border-t border-gray-100 bg-white/50">
-            <div class="flex items-center gap-2">
-                <input id="chat-input" type="text" placeholder="输入你的问题..." class="flex-1 px-4 py-3 rounded-full border border-gray-200 bg-white text-sm input-glow transition-all" onkeypress="if(event.key==='Enter') sendChatMessage()">
-                <button id="chat-send" class="w-11 h-11 rounded-full bg-brand-primary text-white flex items-center justify-center hover:bg-brand-primary-dark transition-colors flex-shrink-0">
-                    <i data-lucide="send" class="w-4 h-4"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -1245,12 +1438,12 @@
             }
         ];
 
-        // 聊天快捷操作
-        const chatQuickActions = [
-            { icon: 'graduation-cap', label: '职业建议', prompt: '我适合什么职业方向？' },
-            { icon: 'book-marked', label: '学习规划', prompt: '根据我的结果，怎么制定学习计划？' },
-            { icon: 'message-circle-heart', label: '人际关系', prompt: '我在人际关系中需要注意什么？' },
-            { icon: 'heart', label: '情绪支持', prompt: '为什么我容易焦虑，怎么调节？' }
+        // AI 人格分析师建议问题
+        const aiSuggestedQuestions = [
+            { icon: 'briefcase', text: '根据我的性格，适合什么样的工作？' },
+            { icon: 'book-open', text: '我的学习风格有什么特点？' },
+            { icon: 'users', text: '我在人际关系中要注意什么？' },
+            { icon: 'heart', text: '为什么我容易焦虑，可以怎么调节？' }
         ];
 
         // 状态
@@ -1957,63 +2150,103 @@
             document.getElementById('open-text-content').textContent = text;
         }
 
-        function renderChatAgent() {
-            const quickActions = document.getElementById('chat-quick-actions');
-            quickActions.innerHTML = chatQuickActions.map(action => `
-                <button onclick="handleQuickAction('${action.label}', '${action.prompt}')" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/70 hover:bg-white border border-gray-100 text-xs text-gray-600 hover:text-brand-primary transition-colors text-left">
-                    <i data-lucide="${action.icon}" class="w-3.5 h-3.5"></i>
-                    ${escapeHtml(action.label)}
+        function renderAiAgentCard() {
+            const questionsContainer = document.getElementById('ai-suggested-questions');
+            questionsContainer.innerHTML = aiSuggestedQuestions.map(q => `
+                <button class="suggested-q-btn" onclick="openAiChatWithQuestion('${escapeHtml(q.text)}')">
+                    <i data-lucide="${q.icon}" class="w-4 h-4 flex-shrink-0 text-brand-primary"></i>
+                    <span>${escapeHtml(q.text)}</span>
+                </button>
+            `).join('');
+            lucide.createIcons({ nodes: questionsContainer });
+
+            // 模态聊天中的快捷按钮
+            const quickActions = document.getElementById('ai-chat-quick-actions');
+            quickActions.innerHTML = aiSuggestedQuestions.map(q => `
+                <button class="suggested-q-btn" onclick="sendAiChatFromQuick('${escapeHtml(q.text)}')">
+                    <i data-lucide="${q.icon}" class="w-4 h-4 flex-shrink-0 text-brand-primary"></i>
+                    <span>${escapeHtml(q.text)}</span>
                 </button>
             `).join('');
             lucide.createIcons({ nodes: quickActions });
         }
 
+        let chatState = { isOpen: false };
+
         // =====================================================
-        // 报告页：聊天交互
+        // 报告页：AI 聊天模态交互
         // =====================================================
 
-        function toggleChat(open) {
-            chatState.isOpen = open;
-            const win = document.getElementById('chat-window');
-            const btn = document.getElementById('chat-toggle');
-            if (open) {
-                win.classList.add('open');
-                btn.classList.add('hidden');
-                document.getElementById('chat-input').focus();
-            } else {
-                win.classList.remove('open');
-                btn.classList.remove('hidden');
-            }
+        function openAiChat() {
+            chatState.isOpen = true;
+            document.getElementById('ai-modal-overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+            setTimeout(() => {
+                document.getElementById('ai-chat-input').focus();
+            }, 400);
         }
 
-        function appendMessage(role, content) {
-            const container = document.getElementById('chat-messages');
+        function closeAiChat() {
+            chatState.isOpen = false;
+            document.getElementById('ai-modal-overlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function openAiChatWithQuestion(question) {
+            openAiChat();
+            sendAiChatFromQuick(question);
+        }
+
+        function appendAiMessage(role, content) {
+            const container = document.getElementById('ai-chat-messages');
             const isUser = role === 'user';
-            const html = `
-                <div class="flex gap-3 ${isUser ? 'flex-row-reverse' : ''}">
-                    ${isUser ? '' : `
+            let html;
+            if (isUser) {
+                html = `
+                    <div class="flex gap-3 flex-row-reverse">
+                        <div class="chat-bubble-user shadow-sm">${escapeHtml(content)}</div>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div class="chat-message-bot">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-brand-auxiliary flex items-center justify-center flex-shrink-0">
                             <i data-lucide="bot" class="w-4 h-4 text-white"></i>
                         </div>
-                    `}
-                    <div class="${isUser ? 'bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-tr-sm' : 'bg-brand-primary/10 text-gray-700 rounded-2xl rounded-tl-sm'} px-4 py-3 max-w-[85%] text-sm leading-relaxed shadow-sm">
-                        ${escapeHtml(content)}
+                        <div class="chat-bubble-bot">${escapeHtml(content)}</div>
                     </div>
-                </div>
-            `;
+                `;
+            }
             container.insertAdjacentHTML('beforeend', html);
             if (!isUser) lucide.createIcons({ nodes: container.lastElementChild });
             container.scrollTop = container.scrollHeight;
         }
 
-        async function handleQuickAction(label, prompt) {
-            chatMessages.push({ role: 'user', content: prompt });
-            appendMessage('user', prompt);
-            await sendChatToBackend();
+        async function sendAiChatFromQuick(question) {
+            chatMessages.push({ role: 'user', content: question });
+            appendAiMessage('user', question);
+            await sendAiChatToBackend();
         }
 
-        async function sendChatToBackend() {
-            const sendBtn = document.getElementById('chat-send');
+        function sendAiChatMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            if (!currentProfile) {
+                appendAiMessage('assistant', '画像数据不存在，请重新测评。');
+                return;
+            }
+
+            chatMessages.push({ role: 'user', content: text });
+            appendAiMessage('user', text);
+            input.value = '';
+
+            sendAiChatToBackend();
+        }
+
+        async function sendAiChatToBackend() {
+            const sendBtn = document.getElementById('ai-chat-send');
             sendBtn.disabled = true;
 
             try {
@@ -2029,37 +2262,21 @@
                 const data = await response.json();
 
                 if (data.error) {
-                    const errorReply = `抱歉，Agent 调用失败：${data.error}。你可以稍后重试，或联系真人专业人士。`;
+                    const errorReply = `抱歉，AI 暂时无法回复：${data.error}。你可以稍后重试。`;
                     chatMessages.push({ role: 'assistant', content: errorReply });
-                    appendMessage('assistant', errorReply);
+                    appendAiMessage('assistant', errorReply);
                 } else {
                     chatMessages.push({ role: 'assistant', content: data.reply });
-                    appendMessage('assistant', data.reply);
+                    appendAiMessage('assistant', data.reply);
                 }
             } catch (e) {
                 console.error('调用 Agent 失败:', e);
-                const errorReply = '抱歉，网络连接失败，无法获取 Agent 回复。请检查后端是否已启动。';
+                const errorReply = '抱歉，网络连接失败。请确认后端服务是否已启动。';
                 chatMessages.push({ role: 'assistant', content: errorReply });
-                appendMessage('assistant', errorReply);
+                appendAiMessage('assistant', errorReply);
             }
 
             sendBtn.disabled = false;
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-            if (!currentProfile) {
-                alert('画像数据不存在，请重新测评。');
-                return;
-            }
-
-            chatMessages.push({ role: 'user', content: text });
-            appendMessage('user', text);
-            input.value = '';
-
-            sendChatToBackend();
         }
 
         // =====================================================
@@ -2178,7 +2395,7 @@
             // 初始化聊天消息
             chatMessages = [{
                 role: 'assistant',
-                content: '你好，我已经阅读了你的测评结果。你可以问我关于职业方向、学习风格、人际策略或情绪调节的问题，我会基于你的画像给出参考建议。'
+                content: '你好呀 👋 我已经读完你的测评报告了。你可以问我关于职业方向、学习风格、人际关系，或者对某个维度分数感到好奇——我会结合你的画像，给你一些参考建议。'
             }];
 
             // 切换到报告页
@@ -2186,9 +2403,6 @@
             document.body.classList.add('report-mode');
             const resultPage = document.getElementById('result-page');
             resultPage.classList.remove('hidden');
-
-            // 显示 AI 聊天按钮
-            document.getElementById('chat-toggle').classList.remove('hidden');
 
             // 生成画像数据（供复制）
             generateProfileData(results);
@@ -2200,7 +2414,7 @@
             renderDimensionCarousel();
             renderAISuggestions();
             renderOpenTextSummary();
-            renderChatAgent();
+            renderAiAgentCard();
 
             // 初始化图标
             lucide.createIcons();
@@ -2251,7 +2465,8 @@
         function restartAssessment() {
             document.body.classList.remove('report-mode');
             document.getElementById('result-page').classList.add('hidden');
-            document.getElementById('chat-toggle').classList.add('hidden');
+            document.getElementById('ai-modal-overlay').classList.remove('open');
+            document.body.style.overflow = '';
             document.getElementById('welcome-page').classList.remove('hidden');
 
             currentQuestion = 0;
@@ -2264,9 +2479,7 @@
                 radarChart = null;
             }
 
-            if (chatState.isOpen) {
-                toggleChat(false);
-            }
+            chatState.isOpen = false;
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -2290,22 +2503,24 @@
                 });
             }
 
-            // 聊天事件
-            const chatToggle = document.getElementById('chat-toggle');
-            const chatClose = document.getElementById('chat-close');
-            const chatSend = document.getElementById('chat-send');
+            // AI 聊天模态事件
+            const aiModalOverlay = document.getElementById('ai-modal-overlay');
+            const aiModalClose = document.getElementById('ai-modal-close');
+            const aiChatSend = document.getElementById('ai-chat-send');
 
-            if (chatToggle) chatToggle.addEventListener('click', () => toggleChat(true));
-            if (chatClose) chatClose.addEventListener('click', () => toggleChat(false));
-            if (chatSend) chatSend.addEventListener('click', sendChatMessage);
+            if (aiModalClose) aiModalClose.addEventListener('click', closeAiChat);
+            if (aiChatSend) aiChatSend.addEventListener('click', sendAiChatMessage);
 
-            // 点击外部关闭聊天
-            document.addEventListener('click', e => {
-                const win = document.getElementById('chat-window');
-                const btn = document.getElementById('chat-toggle');
-                if (chatState.isOpen && !win.contains(e.target) && !btn.contains(e.target)) {
-                    toggleChat(false);
-                }
+            // 点击遮罩层关闭
+            if (aiModalOverlay) {
+                aiModalOverlay.addEventListener('click', e => {
+                    if (e.target === aiModalOverlay) closeAiChat();
+                });
+            }
+
+            // ESC 关闭
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && chatState.isOpen) closeAiChat();
             });
         });
     </script>
