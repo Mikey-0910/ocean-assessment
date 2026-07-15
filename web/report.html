@@ -551,7 +551,9 @@
                 note: '本次测评中，你有 2 道题使用了开放说明，主要分布在开放性、神经质两个维度。这些补充说明已按评分标准纳入对应维度总分。'
             },
             // 当前高亮的维度索引，用于轮播和雷达图联动
-            activeDimensionIndex: 0
+            activeDimensionIndex: 0,
+            // E 选项回复详情（后端注入时可覆盖）
+            e_responses: []
         };
 
         // 维度元数据 + 等级文案库
@@ -814,20 +816,29 @@
 
         // 类型名规则：根据主导维度组合生成
         const archetypeRules = [
-            // 高开放 + 高外向
-            { test: r => r.O.level === '高' && r.E.level === '高', name: '热情探索者' },
-            // 高开放 + 低外向
-            { test: r => r.O.level === '高' && r.E.level === '低', name: '沉静思考者' },
-            // 高尽责 + 低神经质
-            { test: r => r.C.level === '高' && r.N.level === '低', name: '稳健执行者' },
-            // 高宜人性 + 高外向
-            { test: r => r.A.level === '高' && r.E.level === '高', name: '温暖连接者' },
-            // 高宜人性 + 低外向
-            { test: r => r.A.level === '高' && r.E.level === '低', name: '深度倾听者' },
-            // 低神经质优先
-            { test: r => r.N.level === '低', name: '从容稳定者' },
-            // 默认
-            { test: () => true, name: '平衡探索者' }
+            { test: r => r.O.avg >= 3.5 && r.E.avg >= 3.0, name: '热情探索者', emoji: '🔭', subtitle: '好奇心与社交能量并存，世界就是你的实验室' },
+            { test: r => r.O.avg >= 3.5 && r.E.avg < 2.5, name: '沉静思想者', emoji: '📚', subtitle: '在安静中探索世界的深度' },
+            { test: r => r.O.avg >= 3.5 && r.N.avg >= 3.0, name: '敏感创造者', emoji: '🎨', subtitle: '敏锐的感受力是你创作的源泉' },
+            { test: r => r.C.avg >= 3.5 && r.N.avg < 2.5, name: '稳健建筑师', emoji: '🏛️', subtitle: '计划周密、情绪平稳，总能交付成果' },
+            { test: r => r.C.avg >= 3.5 && r.A.avg >= 3.0, name: '可靠守护者', emoji: '🛡️', subtitle: '既可靠又温暖，团队里不可或缺的人' },
+            { test: r => r.C.avg >= 3.5 && r.E.avg < 2.5, name: '独立规划师', emoji: '🗂️', subtitle: '在安静中有条不紊地推进计划' },
+            { test: r => r.A.avg >= 3.5 && r.E.avg >= 3.0, name: '温暖连接者', emoji: '🤝', subtitle: '在人群中传递温暖，社交是你的天赋' },
+            { test: r => r.A.avg >= 3.5 && r.E.avg < 2.5, name: '深度倾听者', emoji: '🦉', subtitle: '话不多但句句走心，擅长一对一连接' },
+            { test: r => r.A.avg >= 3.5 && r.N.avg >= 3.0, name: '敏感疗愈者', emoji: '🌙', subtitle: '你懂别人的痛苦，因为你感受得足够深' },
+            { test: r => r.E.avg >= 3.5 && r.O.avg >= 3.0, name: '社交催化剂', emoji: '🔥', subtitle: '人群中自然发光，带动周围的能量' },
+            { test: r => r.E.avg >= 3.5 && r.N.avg >= 3.0, name: '热忱表达者', emoji: '🎤', subtitle: '表达欲和敏感度都很高，情绪是你的色彩' },
+            { test: r => r.N.avg >= 3.5 && r.O.avg >= 3.0, name: '深度感受者', emoji: '🌊', subtitle: '情绪丰富且好奇，在深刻体验中理解世界' },
+            { test: r => r.N.avg >= 3.5, name: '敏锐守护者', emoji: '🔮', subtitle: '你的敏感不是弱点，而是比别人多一根天线' },
+            { test: r => r.N.avg < 2.0 && r.C.avg >= 3.0, name: '从容实干家', emoji: '⛰️', subtitle: '稳如磐石，行动力与稳定感兼备' },
+            { test: r => r.N.avg < 2.0, name: '从容稳定者', emoji: '🪨', subtitle: '泰山崩于前而色不变，你的稳定感令人安心' },
+            { test: r => r.O.avg < 2.0 && r.C.avg >= 3.0, name: '务实执行者', emoji: '⚙️', subtitle: '脚踏实地，用实际行动说话' },
+            { test: r => r.O.avg < 2.0 && r.A.avg >= 3.0, name: '传统守护者', emoji: '🏡', subtitle: '珍视熟悉的事物和温暖的人际关系' },
+            { test: r => r.E.avg < 2.0 && r.O.avg >= 3.0, name: '内向探索家', emoji: '🔬', subtitle: '独处时精神世界最丰富' },
+            { test: r => r.C.avg < 2.0 && r.O.avg >= 3.0, name: '自由创造者', emoji: '🎭', subtitle: '创造力不受约束，灵感随时迸发' },
+            { test: r => r.A.avg < 2.0 && r.C.avg >= 3.0, name: '理性执行者', emoji: '📐', subtitle: '逻辑清晰、目标明确，用结果说话' },
+            { test: r => r.E.avg < 2.0, name: '安静独行者', emoji: '🌿', subtitle: '独处是能量，安静是力量' },
+            { test: r => r.E.avg >= 3.0, name: '活力社交者', emoji: '🌟', subtitle: '社交是能量来源，人际是你的舞台' },
+            { test: () => true, name: '潮汐旅人', emoji: '🌊', subtitle: '弹性适应，懂得何时前进何时沉淀' }
         ];
 
         // AI 建议内容
@@ -898,13 +909,34 @@
 
         function computeArchetype(results) {
             const rule = archetypeRules.find(r => r.test(results));
-            return rule ? rule.name : '平衡探索者';
+            return rule || { name: '潮汐旅人', emoji: '🌊', subtitle: '弹性适应，懂得何时前进何时沉淀' };
         }
 
-        function generateOverallPortrait(results) {
+        const EMPATHY_LINES = {
+            O: { 高: ['你看世界的角度，是很多人羡慕却学不来的。','那种"想知道更多"的冲动，其实是生命力的证明。'], 中: ['在新与旧之间找到平衡，本身就是一种智慧。','用你自己的节奏探索世界，不需要和别人比较快慢。'], 低: ['你脚下的那片土地，是你用经验一寸一寸铺出来的——这很踏实，也很珍贵。'] },
+            C: { 高: ['你的可靠是身边人最大的安全感。','说到做到——这四个字说起来简单，做起来你比大多数人都好。'], 中: ['在自律和自由之间找到自己的节奏，这本身就是一种了不起的能力。','你不必每件事都做到完美，"完成"比"完美"更值得庆祝。'], 低: ['你的灵活和即兴是这个过度计划的世界里的一股清流。','不是所有人都需要一张排满的日程表，你的方式也有它的美。'] },
+            E: { 高: ['你的热情是能传染的——和你在一起的人会不自觉地被带动。','人群中发光的你，也值得偶尔一个人安静地充电。'], 中: ['你能在热闹和安静之间自如切换，这是一种很难得的弹性。','既享受陪伴也珍惜独处——这种平衡很多人一辈子都在找。'], 低: ['你的安静不是空白，是深度思考正在发生。','不需要变成别人期待的样子，内向者有自己的力量。'] },
+            A: { 高: ['你的温柔不是软弱——让身边的人感到安全，这是很珍贵的能力。','善良有边界才可持续——先照顾好自己，再去温暖别人。'], 中: ['既有同理心又有边界感，你是难得的"理性温暖型"的人。','让所有人满意不是你的责任，你的平衡感本身就是优势。'], 低: ['你的直率和理性是这个充满情绪的世界里稀缺的品质。','逻辑很锋利但不必每次都出鞘——有时候温柔比正确更重要。'] },
+            N: { 高: ['敏感是一种天赋，让你比别人更早感知到风险和他人的情绪。','你的情绪不是一个需要被修复的问题——它只是需要被理解。'], 中: ['大多数时候的稳定已经很好，偶尔的波动也是正常人的温度。','不需要时刻稳定才正常——累的时候允许自己暂停一下。'], 低: ['你的稳定是身边人的定心丸——在混乱中，你是那个能保持清醒的人。','从容不是冷漠——偶尔也让身边的人看到你的情感，会让你更完整。'] }
+        };
+        function getEmpathyLine(dimKey, level) {
+            const lines = EMPATHY_LINES[dimKey]?.[level] || [];
+            if (lines.length === 0) return '';
+            const seed = Math.abs(Math.floor((appState.results[dimKey]?.total || 0) * 7));
+            return lines[seed % lines.length];
+        }
+
+        function generateOverallPortrait(results, eResponses) {
             const dims = ['O', 'C', 'E', 'A', 'N'];
             const phrases = dims.map(d => overallPortrait[d][results[d].level]);
-            return `你像是一个${phrases[0]}的人。${phrases[2]}；${phrases[3]}。同时你${phrases[1]}，而${phrases[4]}。`;
+            let portrait = `你像是一个${phrases[0]}的人。${phrases[2]}；${phrases[3]}。同时你${phrases[1]}，而${phrases[4]}。`;
+            if (eResponses && eResponses.length > 0) {
+                const highlights = eResponses.filter(r => r.confidence >= 0.7 && r.userResponse.length >= 8).slice(0, 2);
+                if (highlights.length > 0) {
+                    portrait += ' 值得一提的是：' + highlights.map(r => `你在"${r.questionText.substring(0, 20)}..."这道题中的回答体现了${r.dimensionName}维度上的独特倾向`).join('。') + '。';
+                }
+            }
+            return portrait;
         }
 
         function computeTotalScore(results) {
@@ -936,21 +968,23 @@
 
         function renderHero() {
             const archetype = computeArchetype(appState.results);
-            const portrait = generateOverallPortrait(appState.results);
+            const eResp = (appState.e_responses) || [];
+            const portrait = generateOverallPortrait(appState.results, eResp);
             const totalScore = computeTotalScore(appState.results);
 
-            document.getElementById('hero-archetype').textContent = archetype;
-            document.getElementById('hero-summary').textContent = portrait;
+            document.getElementById('hero-archetype').textContent = (archetype.emoji || '🌊') + ' ' + (archetype.name || archetype);
+            document.getElementById('hero-summary').textContent = archetype.subtitle || portrait;
             document.getElementById('hero-score').textContent = totalScore;
         }
 
         function renderOverview() {
             const archetype = computeArchetype(appState.results);
-            const portrait = generateOverallPortrait(appState.results);
+            const eResp = (appState.e_responses) || [];
+            const portrait = generateOverallPortrait(appState.results, eResp);
             const keywords = getKeywords(appState.results);
             const totalScore = computeTotalScore(appState.results);
 
-            document.getElementById('overview-archetype').textContent = archetype;
+            document.getElementById('overview-archetype').textContent = (archetype.emoji || '🌊') + ' ' + (archetype.name || archetype);
             document.getElementById('overview-summary').textContent = portrait;
             document.getElementById('overview-score').textContent = totalScore;
 
@@ -1037,12 +1071,20 @@
             const track = document.getElementById('dimension-carousel');
             const dots = document.getElementById('dim-dots');
             const dims = ['O', 'C', 'E', 'A', 'N'];
+            const eResp = (appState.e_responses) || [];
 
             track.innerHTML = dims.map((d, i) => {
                 const dim = dimensionData[d];
                 const result = appState.results[d];
                 const profile = dim.levels[result.level];
                 const levelClass = getLevelClass(result.level);
+                const dimEResp = eResp.filter(x => x.dimension === d);
+                const empathyLine = getEmpathyLine(d, result.level);
+
+                let eRespHTML = '';
+                if (dimEResp.length > 0) {
+                    eRespHTML = `<div class="bg-brand-primary/5 rounded-2xl p-5 mt-4 border-l-4 border-brand-primary"><h4 class="flex items-center gap-2 text-sm font-semibold text-brand-primary mb-3"><i data-lucide="message-circle" class="w-4 h-4"></i>你的个性化表达</h4>${dimEResp.map(resp => `<div class="mb-3 last:mb-0"><p class="text-xs text-gray-400 mb-1">第 ${resp.questionId} 题：${escapeHtml(resp.questionText.substring(0, 40))}...</p><p class="text-sm text-gray-700 italic bg-white/70 rounded-xl px-4 py-2">"${escapeHtml(resp.userResponse)}"</p><p class="text-xs text-gray-400 mt-1">AI 评分：${resp.score} 分 | 置信度：${(resp.confidence || 0).toFixed(2)}</p></div>`).join('')}</div>`;
+                }
 
                 return `
                     <div class="carousel-slide ${i === appState.activeDimensionIndex ? 'active' : ''}" data-index="${i}">
@@ -1124,6 +1166,7 @@
                                         </h4>
                                         <p class="text-sm text-gray-700 leading-relaxed italic">${escapeHtml(profile.tip)}</p>
                                     </div>
+                                    ${empathyLine ? `<div class="rounded-2xl p-5 text-center bg-gray-100/50"><p class="text-sm text-gray-500 italic leading-relaxed">${escapeHtml(empathyLine)}</p></div>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -1199,8 +1242,9 @@
         }
 
         function renderOpenTextSummary() {
-            const dims = appState.openText.dimensions.map(d => dimensionData[d].name).join('、');
-            const text = `${appState.openText.note} 主要分布在${dims}两个维度。`;
+            const eResp = (appState.e_responses) || [];
+            const dimNames = appState.openText.dimensions.map(d => dimensionData[d].name).join('、');
+            const text = `${appState.openText.note} 主要分布在${dimNames}维度。`;
             document.getElementById('open-text-content').textContent = text;
         }
 
